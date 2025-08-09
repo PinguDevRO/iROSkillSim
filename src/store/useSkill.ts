@@ -42,7 +42,7 @@ const validateUsedPoint = (isRoMode: boolean, gameData: JobModel | null): JobMod
 
     for (const skillTree of skillTrees.slice(resetFrom)) {
         for (const skill of Object.values(skillTree.skills)) {
-            if (skill.defaultLevel === 0) {
+            if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
                 skill.skillState = { ...skill.skillState, canBeLeveled: true };
             }
         }
@@ -73,14 +73,11 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
     const skillMap = new Map<number, SkillModel>();
     const dependencyMap = new Map<number, number[]>();
 
-    for (const skillTree of Object.values(gameData.skillTree)) {
-        for (const [idStr, skill] of Object.entries(skillTree.skills)) {
-            const id = Number(idStr);
-            skillMap.set(id, { ...skill });
+    for (const st of Object.values(gameData.skillTree)) {
+        for (const skill of Object.values(st.skills)) {
+            skillMap.set(skill.skillId, { ...skill });
         }
     }
-
-    console.log(skillMap);
 
     for (const skill of skillMap.values()) {
         for (const req of skill.neededSkills) {
@@ -93,7 +90,9 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
 
     const enforceRequirements = (skill: SkillModel, visited = new Set<number>()) => {
         if (visited.has(skill.skillId)) return;
+        if (skill.currentLevel === 0 || skill.defaultLevel > 0) return;
         visited.add(skill.skillId);
+
 
         for (const req of skill.neededSkills) {
             const required = skillMap.get(req.skillId);
@@ -113,7 +112,7 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
         const dependents = dependencyMap.get(skillId) ?? [];
         for (const depId of dependents) {
             const dependent = skillMap.get(depId);
-            if (!dependent || dependent.currentLevel === 0) continue;
+            if (!dependent || dependent.currentLevel === 0 || dependent.defaultLevel > 0) continue;
 
             const stillValid = dependent.neededSkills.every(req => {
                 const reqSkill = skillMap.get(req.skillId);
@@ -149,8 +148,6 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
             return gameData;
         }
     }
-
-    console.log(gameData.skillTree);
 
     const updatedSkillTree: { [jobId: number]: SkillTreeModel } = {};
 
@@ -225,6 +222,7 @@ export type State = {
     level_down_skill: (jobId: number, skillId: number, maxLevel?: number) => void;
     hover_skill_dependency: (skillId: number, isHover: boolean) => void;
     update_showSkillDescription: (_showSkillDescription: boolean) => void;
+    set_ro_mode: (_roMode: boolean) => void;
     update_ro_mode: (_roMode: boolean) => void;
     open_character_modal: () => void;
     close_character_modal: () => void;
@@ -302,6 +300,9 @@ export const useSkill = create<State>()(
             update_showSkillDescription: (_showSkillDescription: boolean) => {
                 set({ _showSkillDescription });
             },
+            set_ro_mode: (_roMode: boolean) => {
+                set({ _roMode });
+            },
             update_ro_mode: (_roMode: boolean) => {
                 if (_roMode) {
                     const gameData = get().gameData;
@@ -356,6 +357,7 @@ export const useSkill = create<State>()(
                         const loadedObject = obj as ShareModel;
                         const gameData = jobData.find((x) => x.jobId === loadedObject.job_id);
                         const isRoMode = loadedObject.ro_mode;
+                        get().set_ro_mode(isRoMode);
 
                         if (gameData) {
                             for (const skillTree of Object.values(gameData.skillTree)) {
@@ -367,7 +369,7 @@ export const useSkill = create<State>()(
                                     }
                                 }
                             }
-                            console.log(gameData.skillTree);
+
                             const validatedGameData = validateSkills(isRoMode, gameData);
                             get().set_game_data(validatedGameData);
                             enqueueSnackbar("Build loaded correctly!", { variant: "success" });

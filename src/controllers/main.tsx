@@ -47,8 +47,8 @@ const MainController = () => {
     }, [isXs]);
 
     useEffect(() => {
-        if (build !== null) {
-            load_build(build, model?.jobSkillsData);
+        if (build !== null && model !== undefined && model.jobSkillsData !== undefined) {
+            load_build(build, [...model.jobSkillsData]);
         }
     }, [build, model]);
 
