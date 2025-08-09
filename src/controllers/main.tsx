@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import JobSkillsToModel, { JobModel } from "@/models/get-job-skills";
 import { useTheme, useMediaQuery } from '@mui/material';
 import { useSkill } from "@/store/useSkill";
@@ -25,6 +25,8 @@ export interface Model {
 
 const MainController = () => {
 
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const theme = useTheme();
     const isXs = useMediaQuery(theme.breakpoints.only('xs'));
 
@@ -33,7 +35,6 @@ const MainController = () => {
 
     const load_build = useSkill((x) => x.load_skill_build);
     const close_character_modal = useSkill((x) => x.close_character_modal);
-    const searchParams = useSearchParams();
     const build = searchParams.get('build');
 
     useEffect(() => {
@@ -49,6 +50,7 @@ const MainController = () => {
     useEffect(() => {
         if (build !== null && model !== undefined && model.jobSkillsData !== undefined) {
             load_build(build, [...model.jobSkillsData]);
+            router.replace('/', { scroll: false });
         }
     }, [build, model]);
 
