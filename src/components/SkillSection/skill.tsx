@@ -4,9 +4,9 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import ColoredText from './ColoredText';
-import { hoverModel } from '@/models/get-skills';
+import { SkillModel } from '@/models/get-job-skills';
 import { styled } from '@mui/material/styles';
-import { useStore } from '@/store/useStore';
+import { useSkill } from '@/store/useSkill';
 
 const StyledIconButton = styled(IconButton)({
     position: 'relative',
@@ -36,22 +36,14 @@ const Overlay = styled('div', {
 
 const Skill = ({
     jobId,
-    skillId,
-    skillName,
-    skillDescription,
-    hoverData,
-    canBeLeveled,
+    skill,
 }: {
     jobId: number;
-    skillId: number;
-    skillName: string;
-    skillDescription: string[];
-    hoverData: hoverModel;
-    canBeLeveled: boolean;
+    skill: SkillModel;
 }) => {
 
-    const hoverSkill = useStore((x) => x.hover_skill_dependency);
-    const showSkillDescription = useStore((x) => x._showSkillDescription);
+    const hoverSkill = useSkill((x) => x.hover_skill_dependency);
+    const showSkillDescription = useSkill((x) => x._showSkillDescription);
 
     return (
         <Box
@@ -105,7 +97,7 @@ const Skill = ({
                 }}
                 title={
                     <Box display="flex" flexDirection="column" alignItems="start" justifyContent="start">
-                        <ColoredText jobId={jobId} lines={skillDescription} />
+                        <ColoredText jobId={jobId} lines={skill.skillDescription} />
                     </Box>
                 }
             >
@@ -117,19 +109,19 @@ const Skill = ({
                         alignItems: "center",
                         justifyContent: "center",
                     }}
-                    onMouseEnter={() => hoverSkill(skillId, true)}
-                    onMouseLeave={() => hoverSkill(skillId, false)}
+                    onMouseEnter={() => hoverSkill(skill.skillId, true)}
+                    onMouseLeave={() => hoverSkill(skill.skillId, false)}
                 >
                     <Image
-                        src={`https://db.irowiki.org/image/skill/${skillId}.png`}
-                        alt={skillName}
+                        src={`https://db.irowiki.org/image/skill/${skill.skillId}.png`}
+                        alt={skill.skillName}
                         width={28}
                         height={28}
                         draggable={false}
                         loading="eager"
-                        style={{ filter: canBeLeveled ? 'none' : 'grayscale(100%)' }}
+                        style={{ filter: skill.skillState.canBeLeveled ? 'none' : 'grayscale(100%)' }}
                     />
-                    {hoverData.state && hoverData.skillLevel > 0 ? (
+                    {skill.skillState.state && skill.skillState.skillLevel > 0 ? (
                         <Typography
                             position='absolute'
                             top='55%'
@@ -146,12 +138,12 @@ const Skill = ({
                                     `,
                             }}
                         >
-                            {hoverData.skillLevel}
+                            {skill.skillState.skillLevel}
                         </Typography>
                     ) : (
                         <></>
                     )}
-                    <Overlay show={hoverData.state} />
+                    <Overlay show={skill.skillState.state} />
                 </StyledIconButton>
             </Tooltip>
         </Box>

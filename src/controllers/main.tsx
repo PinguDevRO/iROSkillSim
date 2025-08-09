@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from 'next/navigation';
-import SkillsToModel, { SkillsModel } from "@/models/get-skills";
-import JobSkillToModel, { JobSkillModel } from "@/models/get-job-skill";
+import JobSkillsToModel, { JobModel } from "@/models/get-job-skills";
 import { useTheme, useMediaQuery } from '@mui/material';
-import { useStore } from "@/store/useStore";
+import { useSkill } from "@/store/useSkill";
 
 import GetSkills from "@/services/get-skills";
 import GetJobSkill from "@/services/get-job-skill";
@@ -17,11 +16,10 @@ export interface EndpointStatus {
     error: boolean;
 };
 
-export type EndpointName = "getJobSkill" | "getSkills";
+export type EndpointName = "any" | "getJobSkills";
 
 export interface Model {
-    jobSkillData: JobSkillModel[] | undefined;
-    skillsData: SkillsModel[] | undefined;
+    jobSkillsData: JobModel[] | undefined;
     lastUpdate: Date | undefined;
 };
 
@@ -33,14 +31,13 @@ const MainController = () => {
     const [model, setModel] = useState<Partial<Model>>();
     const [endpoints, setEndpoints] = useState<Partial<Record<EndpointName, EndpointStatus>>>();
 
-    const load_build = useStore((x) => x.load_skill_build);
-    const close_character_modal = useStore((x) => x.close_character_modal);
+    const load_build = useSkill((x) => x.load_skill_build);
+    const close_character_modal = useSkill((x) => x.close_character_modal);
     const searchParams = useSearchParams();
     const build = searchParams.get('build');
 
     useEffect(() => {
-        loadJobSkillData();
-        loadSkillsData();
+        loadJobSkillsData();
     }, []);
 
     useEffect(() => {
@@ -51,7 +48,7 @@ const MainController = () => {
 
     useEffect(() => {
         if (build !== null) {
-            load_build(build, model?.jobSkillData, model?.skillsData);
+            load_build(build, model?.jobSkillsData);
         }
     }, [build, model]);
 
@@ -94,31 +91,17 @@ const MainController = () => {
         },
     });
 
-    const loadJobSkillData = async () => {
-        const statusEndpoint = buildStatusEndpoint("getJobSkill");
+    const loadJobSkillsData = async () => {
+        const statusEndpoint = buildStatusEndpoint("getJobSkills");
         try {
             statusEndpoint.loading();
-            const response = await GetJobSkill();
-            const jobSkillData = response !== null ? JobSkillToModel(response) : undefined;
-            updateModel({ jobSkillData });
+            const jobSkillResponse = await GetJobSkill();
+            const skillResponse = await GetSkills();
+            const jobSkillsData = JobSkillsToModel(jobSkillResponse, skillResponse);
+            updateModel({ jobSkillsData });
         } catch {
             statusEndpoint.error();
-            updateModel({ jobSkillData: undefined });
-        } finally {
-            statusEndpoint.done();
-        }
-    };
-
-    const loadSkillsData = async () => {
-        const statusEndpoint = buildStatusEndpoint("getSkills");
-        try {
-            statusEndpoint.loading();
-            const response = await GetSkills();
-            const skillsData = response !== null ? SkillsToModel(response) : undefined;
-            updateModel({ skillsData });
-        } catch {
-            statusEndpoint.error();
-            updateModel({ skillsData: undefined });
+            updateModel({ jobSkillsData: undefined });
         } finally {
             statusEndpoint.done();
         }

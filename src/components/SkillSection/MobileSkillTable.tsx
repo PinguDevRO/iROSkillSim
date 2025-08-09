@@ -4,27 +4,28 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from '@mui/material/Typography';
 import Skill from "./skill";
-import { JobSkillPositionModel } from "@/models/get-job-skill";
+import { SkillModel } from "@/models/get-job-skills";
 import { ap_skills } from "@/constants/skilllist";
-import { useStore } from '@/store/useStore';
+import { useSkill } from "@/store/useSkill";
 
 
 const MobileSkillTable = ({
     jobId,
-    skillTreeData,
 }: {
     jobId: number;
-    skillTreeData: JobSkillPositionModel[];
 }) => {
-    const gameSkills = useStore((x) => x.gameSkills);
-    const skillMap = new Map<number, JobSkillPositionModel>();
-    skillTreeData.forEach(skill => skillMap.set(skill.skillPosition, skill));
+    const gameData = useSkill((x) => x.gameData);
+    const skillMap = new Map<number, SkillModel>();
+    const jobSkillTree = gameData?.skillTree[jobId];
+    if(jobSkillTree !== undefined){
+        Object.values(jobSkillTree.skills).forEach(skill => skillMap.set(skill.skillPosition, skill));
+    }
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const didLongPressRef = useRef(false);
 
-    const levelUpSkill = useStore((x) => x.level_up_skill);
-    const levelDownSkill = useStore((x) => x.level_down_skill);
+    const levelUpSkill = useSkill((x) => x.level_up_skill);
+    const levelDownSkill = useSkill((x) => x.level_down_skill);
 
     const handleLongPress = () => {
         didLongPressRef.current = true;
@@ -47,17 +48,17 @@ const MobileSkillTable = ({
         }
     };
 
-    const handleTouchEndDown = (skillId: number, newLevel: number) => {
+    const handleTouchEndDown = (jobId: number, skillId: number, newLevel: number) => {
         clearPressTimer();
         if (didLongPressRef.current) {
-            levelDownSkill(skillId, newLevel);
+            levelDownSkill(jobId, skillId, newLevel);
         }
     };
 
-    const handleTouchEndUp = (skillId: number, newLevel: number) => {
+    const handleTouchEndUp = (jobId: number, skillId: number, newLevel: number) => {
         clearPressTimer();
         if (didLongPressRef.current) {
-            levelUpSkill(skillId, newLevel);
+            levelUpSkill(jobId, skillId, newLevel);
         }
     };
 
@@ -70,7 +71,6 @@ const MobileSkillTable = ({
             px={4}
         >
             {Array.from(skillMap.values()).map((skill, index) => {
-                const currentSkill = gameSkills?.find((x) => x.skillId === skill.skillId);
                 return (
                     <Box
                         key={index}
@@ -84,9 +84,9 @@ const MobileSkillTable = ({
                         width="100%"
                         height={40}
                     >
-                        {currentSkill ? (
+                        {skill ? (
                             <>
-                                <Skill jobId={jobId} skillId={skill.skillId} skillName={currentSkill.skillName} skillDescription={currentSkill.skillDescription} hoverData={currentSkill.isHovered} canBeLeveled={currentSkill.canBeLeveled} />
+                                <Skill jobId={jobId} skill={skill} />
                                 <Box
                                     display="flex"
                                     flexDirection="column"
@@ -98,7 +98,7 @@ const MobileSkillTable = ({
                                         color="#828282"
                                         fontSize={12}
                                     >
-                                        {currentSkill.skillName}
+                                        {skill.skillName}
                                     </Typography>
                                     <Box
                                         display="flex"
@@ -116,7 +116,7 @@ const MobileSkillTable = ({
                                         >
                                             <IconButton
                                                 sx={{
-                                                    display: currentSkill.defaultLevel > 0 ? 'none' : 'inline',
+                                                    display: skill.defaultLevel > 0 ? 'none' : 'inline',
                                                     p: 0,
                                                     m: 0,
                                                     width: 11,
@@ -126,9 +126,9 @@ const MobileSkillTable = ({
                                                         backgroundColor: 'transparent',
                                                     },
                                                 }}
-                                                onClick={() => levelDownSkill(currentSkill.skillId)}
+                                                onClick={() => levelDownSkill(jobId, skill.skillId)}
                                                 onTouchStart={startPressTimer}
-                                                onTouchEnd={() => handleTouchEndDown(currentSkill.skillId, currentSkill.defaultLevel)}
+                                                onTouchEnd={() => handleTouchEndDown(jobId, skill.skillId, skill.defaultLevel)}
                                                 onContextMenu={handleContextMenu}
                                             >
                                                 <Image
@@ -148,11 +148,11 @@ const MobileSkillTable = ({
                                                     fontWeight: 700,
                                                 }}
                                             >
-                                                {currentSkill.defaultLevel > 0 ? `Lv: ${currentSkill.maxLevel}` : `Lv: ${currentSkill.currentLevel} / ${currentSkill.maxLevel}`}
+                                                {skill.defaultLevel > 0 ? `Lv: ${skill.maxLevel}` : `Lv: ${skill.currentLevel} / ${skill.maxLevel}`}
                                             </Typography>
                                             <IconButton
                                                 sx={{
-                                                    display: currentSkill.defaultLevel > 0 ? 'none' : 'inline',
+                                                    display: skill.defaultLevel > 0 ? 'none' : 'inline',
                                                     p: 0,
                                                     m: 0,
                                                     width: 11,
@@ -162,9 +162,9 @@ const MobileSkillTable = ({
                                                         backgroundColor: 'transparent',
                                                     },
                                                 }}
-                                                onClick={() => levelUpSkill(currentSkill.skillId)}
+                                                onClick={() => levelUpSkill(jobId, skill.skillId)}
                                                 onTouchStart={startPressTimer}
-                                                onTouchEnd={() => handleTouchEndUp(currentSkill.skillId, currentSkill.maxLevel)}
+                                                onTouchEnd={() => handleTouchEndUp(jobId, skill.skillId, skill.maxLevel)}
                                                 onContextMenu={handleContextMenu}
                                             >
                                                 <Image
@@ -191,7 +191,7 @@ const MobileSkillTable = ({
                                                     fontWeight: 700,
                                                 }}
                                             >
-                                                {currentSkill.sp.length > 0 && currentSkill.defaultLevel === 0 && currentSkill.currentLevel === 0 ? 'Lv Up' : currentSkill.sp.length > 0 && currentSkill.defaultLevel === 0 && currentSkill.sp[currentSkill.currentLevel - 1] > 0 && ap_skills.includes(currentSkill.skillId) ? `AP: ${currentSkill.sp[currentSkill.currentLevel - 1]}` : currentSkill.sp.length > 0 && currentSkill.defaultLevel === 0 && currentSkill.sp[currentSkill.currentLevel - 1] > 0 && !ap_skills.includes(currentSkill.skillId) ? `Sp: ${currentSkill.sp[currentSkill.currentLevel - 1]}` : currentSkill.sp.length > 0 && currentSkill.defaultLevel > 0 && currentSkill.sp[0] > 0 ? `Sp: ${currentSkill.sp[0]}` : 'Passive'}
+                                                {skill.sp.length > 0 && skill.defaultLevel === 0 && skill.currentLevel === 0 ? 'Lv Up' : skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 && ap_skills.includes(skill.skillId) ? `AP: ${skill.sp[skill.currentLevel - 1]}` : skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 && !ap_skills.includes(skill.skillId) ? `Sp: ${skill.sp[skill.currentLevel - 1]}` : skill.sp.length > 0 && skill.defaultLevel > 0 && skill.sp[0] > 0 ? `Sp: ${skill.sp[0]}` : 'Passive'}
                                             </Typography>
                                         </Box>
                                     </Box>

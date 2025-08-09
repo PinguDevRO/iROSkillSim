@@ -42,7 +42,7 @@ const MainScreen = ({
                 horizontal: 'right',
             }}
         >
-            <ClassSelect />
+            <ClassSelect jobData={model?.jobSkillsData} />
             <ShareModal />
             <Box
                 sx={{
@@ -78,7 +78,7 @@ const MainScreen = ({
                 {handleLoading() ? (
                     <Loading />
                 ) : (
-                    <SkillSection jobSkill={model?.jobSkillData} skills={model?.skillsData} />
+                    <SkillSection jobData={model?.jobSkillsData} />
                 )}
             </Box>
         </SnackbarProvider>

@@ -3,31 +3,16 @@ import Switch from '@mui/material/Switch';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import MenuButton from '../Button/MenuButton';
-import { get_skill_points_by_id } from '@/constants/joblist';
-import { useStore } from '@/store/useStore';
+import { useSkill } from '@/store/useSkill';
 
 
 const SkillHeader = () => {
 
-    const showSkillDescription = useStore((x) => x._showSkillDescription);
-    const roMode = useStore((x) => x._roMode);
-    const selectedJob = useStore((x) => x.gameClass);
-    const gameSkills = useStore((x) => x.gameSkills);
-    const setShowSkilLDescription = useStore((x) => x.update_showSkillDescription);
-    const setRoMode = useStore((x) => x.update_ro_mode);
-
-    const get_total_used_points = (): number => {
-        let points = 0;
-        if (gameSkills !== null) {
-            for (const skill of gameSkills) {
-                if (skill.defaultLevel === 0) {
-                    points += skill.currentLevel;
-                }
-            }
-        }
-
-        return points;
-    };
+    const showSkillDescription = useSkill((x) => x._showSkillDescription);
+    const roMode = useSkill((x) => x._roMode);
+    const selectedJob = useSkill((x) => x.gameData);
+    const setShowSkilLDescription = useSkill((x) => x.update_showSkillDescription);
+    const setRoMode = useSkill((x) => x.update_ro_mode);
 
     return (
         <Box
@@ -82,10 +67,10 @@ const SkillHeader = () => {
                     fontSize={16}
                     fontWeight={700}
                     sx={{
-                        color: selectedJob !== null && get_total_used_points() > get_skill_points_by_id(selectedJob.id) ? 'red' : 'inherit',
+                        color: selectedJob !== null && selectedJob.usedSkillPoints > selectedJob.skillPoints ? 'red' : 'inherit',
                     }}
                 >
-                    {selectedJob !== null ? `(${get_total_used_points()}/${get_skill_points_by_id(selectedJob.id)})` : '(0/0)'}
+                    {selectedJob !== null ? `(${selectedJob.usedSkillPoints}/${selectedJob.skillPoints})` : '(0/0)'}
                 </Typography>
             </Box>
         </Box>

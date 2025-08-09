@@ -1,0 +1,435 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { JobModel, SkillModel, SkillTreeModel } from '@/models/get-job-skills';
+import { enqueueSnackbar } from 'notistack';
+
+
+interface ShareModel {
+    job_id: number;
+    ro_mode: boolean;
+    skills: { [key: number]: number };
+};
+
+const updateUsedSkillPoints = (gameData: JobModel): void => {
+    gameData.usedSkillPoints = 0;
+    for (const skillTree of Object.values(gameData.skillTree)) {
+        skillTree.usedSkillPoints = 0;
+        for (const skill of Object.values(skillTree.skills)) {
+            if (skill.defaultLevel === 0) {
+                skillTree.usedSkillPoints += skill.currentLevel;
+            }
+        }
+        gameData.usedSkillPoints += skillTree.usedSkillPoints;
+    }
+};
+
+const validateUsedPoint = (isRoMode: boolean, gameData: JobModel | null): JobModel | null => {
+    if (!gameData) return gameData;
+    updateUsedSkillPoints(gameData);
+    if (!isRoMode) return gameData;
+
+    const skillTrees = Object.values(gameData.skillTree);
+
+    if (skillTrees.length === 0) return gameData;
+
+    let resetFrom = 0;
+    for (let i = 0; i < skillTrees.length; i++) {
+        if (skillTrees[i].usedSkillPoints < skillTrees[i].skillPoints) {
+            resetFrom = i;
+            break;
+        }
+    }
+
+    for (const skillTree of skillTrees.slice(resetFrom)) {
+        for (const skill of Object.values(skillTree.skills)) {
+            if (skill.defaultLevel === 0) {
+                skill.skillState = { ...skill.skillState, canBeLeveled: true };
+            }
+        }
+    }
+
+    for (const skillTree of skillTrees.slice(resetFrom + 1)) {
+        for (const skill of Object.values(skillTree.skills)) {
+            if (skill.defaultLevel === 0) {
+                skill.currentLevel = 0;
+                skill.skillState = { ...skill.skillState, canBeLeveled: false };
+            }
+        }
+    }
+
+    updateUsedSkillPoints(gameData);
+    return {
+        ...gameData,
+        skillTree: skillTrees.reduce<{ [key: number]: SkillTreeModel }>((acc, tree) => {
+            acc[tree.jobId] = tree;
+            return acc;
+        }, {}),
+    };
+};
+
+const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: number, newLevel?: number): JobModel | null => {
+    if (!gameData) return null;
+
+    const skillMap = new Map<number, SkillModel>();
+    const dependencyMap = new Map<number, number[]>();
+
+    for (const skillTree of Object.values(gameData.skillTree)) {
+        for (const [idStr, skill] of Object.entries(skillTree.skills)) {
+            const id = Number(idStr);
+            skillMap.set(id, { ...skill });
+        }
+    }
+
+    console.log(skillMap);
+
+    for (const skill of skillMap.values()) {
+        for (const req of skill.neededSkills) {
+            if (!dependencyMap.has(req.skillId)) {
+                dependencyMap.set(req.skillId, []);
+            }
+            dependencyMap.get(req.skillId)!.push(skill.skillId);
+        }
+    }
+
+    const enforceRequirements = (skill: SkillModel, visited = new Set<number>()) => {
+        if (visited.has(skill.skillId)) return;
+        visited.add(skill.skillId);
+
+        for (const req of skill.neededSkills) {
+            const required = skillMap.get(req.skillId);
+            if (!required) continue;
+
+            if (required.currentLevel < req.skillLevel) {
+                required.currentLevel = req.skillLevel;
+                enforceRequirements(required, visited);
+            }
+        }
+    };
+
+    const invalidateDependents = (skillId: number, visited = new Set<number>()) => {
+        if (visited.has(skillId)) return;
+        visited.add(skillId);
+
+        const dependents = dependencyMap.get(skillId) ?? [];
+        for (const depId of dependents) {
+            const dependent = skillMap.get(depId);
+            if (!dependent || dependent.currentLevel === 0) continue;
+
+            const stillValid = dependent.neededSkills.every(req => {
+                const reqSkill = skillMap.get(req.skillId);
+                return reqSkill && reqSkill.currentLevel >= req.skillLevel;
+            });
+
+            if (!stillValid) {
+                dependent.currentLevel = 0;
+                invalidateDependents(dependent.skillId, visited);
+            }
+        }
+    };
+
+    if (skillId !== undefined && newLevel !== undefined) {
+        const changedSkill = skillMap.get(skillId);
+        if (!changedSkill) return gameData;
+
+        changedSkill.currentLevel = newLevel;
+
+        enforceRequirements(changedSkill);
+        invalidateDependents(skillId);
+    } else {
+        for (const skill of skillMap.values()) {
+            enforceRequirements(skill);
+        }
+        for (const skill of skillMap.values()) {
+            invalidateDependents(skill.skillId);
+        }
+    }
+
+    if (isRoMode) {
+        if (gameData.usedSkillPoints > gameData.skillPoints) {
+            return gameData;
+        }
+    }
+
+    console.log(gameData.skillTree);
+
+    const updatedSkillTree: { [jobId: number]: SkillTreeModel } = {};
+
+    for (const [jobIdStr, skillTree] of Object.entries(gameData.skillTree)) {
+        const jobId = Number(jobIdStr);
+        const updatedSkills: { [skillId: number]: SkillModel } = {};
+
+        for (const skillIdStr of Object.keys(skillTree.skills)) {
+            const skillId = Number(skillIdStr);
+            const updatedSkill = skillMap.get(skillId);
+            if (updatedSkill) {
+                updatedSkills[skillId] = updatedSkill;
+            }
+        }
+
+        updatedSkillTree[jobId] = {
+            ...skillTree,
+            skills: updatedSkills,
+        };
+    }
+
+    updateUsedSkillPoints(gameData);
+
+    return {
+        ...gameData,
+        skillTree: updatedSkillTree,
+    };
+};
+
+const setHoverRecursive = (skillId: number, isHover: boolean, gameData: JobModel, visited = new Set<number>(), neededLevel?: number): void => {
+    if (visited.has(skillId)) return;
+    visited.add(skillId);
+
+    let match: SkillModel | undefined;
+
+    for (const skillTree of Object.values(gameData.skillTree)) {
+        const skill = skillTree.skills[skillId];
+        if (skill) {
+            match = skill;
+            break;
+        }
+    }
+
+    if (!match) return;
+
+    match.skillState = {
+        ...match.skillState,
+        state: isHover,
+        skillLevel: neededLevel !== undefined && isHover ? neededLevel : 0,
+    };
+
+    const jobIds = Object.keys(gameData.skillTree).map(Number);
+
+    for (const dep of match.neededSkills || []) {
+        if (dep.jobId !== null && !jobIds.includes(dep.jobId)) {
+            continue;
+        }
+        setHoverRecursive(dep.skillId, isHover, gameData, visited, dep.skillLevel);
+    }
+};
+
+export type State = {
+    _roMode: boolean;
+    _showSkillDescription: boolean;
+    _characterModal: boolean;
+    _shareModal: boolean;
+    _shareLink: string | null;
+    gameData: JobModel | null;
+
+    set_game_data: (gameData: JobModel | null) => void;
+    level_up_skill: (jobId: number, skillId: number, maxLevel?: number) => void;
+    level_down_skill: (jobId: number, skillId: number, maxLevel?: number) => void;
+    hover_skill_dependency: (skillId: number, isHover: boolean) => void;
+    update_showSkillDescription: (_showSkillDescription: boolean) => void;
+    update_ro_mode: (_roMode: boolean) => void;
+    open_character_modal: () => void;
+    close_character_modal: () => void;
+    open_share_modal: () => void;
+    close_share_modal: () => void;
+    load_skill_build: (build: string, jobData: JobModel[] | undefined) => void;
+    share_skill_build: () => void;
+    reset_skills: () => void;
+};
+
+export const initialState = {
+    _roMode: true,
+    _showSkillDescription: false,
+    _characterModal: true,
+    _shareModal: false,
+    _shareLink: null,
+    gameData: null,
+};
+
+export const useSkill = create<State>()(
+    persist(
+        (set, get) => ({
+            ...initialState,
+
+            set_game_data: (gameData: JobModel | null) => {
+                const isRoMode = get()._roMode;
+                const finalGameData = validateUsedPoint(isRoMode, gameData);
+                set({ gameData: finalGameData });
+            },
+            level_up_skill: (jobId: number, skillId: number, maxLevel?: number) => {
+                const gameData = get().gameData;
+                const isRoMode = get()._roMode;
+
+                if (gameData === null) return;
+
+                const jobSkillTree = gameData.skillTree[jobId];
+                if (jobSkillTree !== undefined) {
+                    const skill = jobSkillTree.skills[skillId];
+                    if (skill !== undefined) {
+                        if(skill.currentLevel < skill.maxLevel){
+                            const updatedLevel = maxLevel !== undefined && maxLevel === skill.maxLevel ? maxLevel : skill.currentLevel + 1;
+                            const updatedGameData = validateSkills(isRoMode, gameData, skillId, updatedLevel);
+                            const finalGameData = validateUsedPoint(isRoMode, updatedGameData);
+                            set({ gameData: finalGameData });
+                        }
+                    }
+                }
+            },
+            level_down_skill: (jobId: number, skillId: number, minLevel?: number) => {
+                const gameData = get().gameData;
+                const isRoMode = get()._roMode;
+
+                if (gameData === null) return;
+
+                const jobSkillTree = gameData.skillTree[jobId];
+                if (jobSkillTree !== undefined) {
+                    const skill = jobSkillTree.skills[skillId];
+                    if (skill !== undefined) {
+                        if(skill.currentLevel > 0){
+                            const updatedLevel = minLevel !== undefined && minLevel === skill.defaultLevel ? minLevel : skill.currentLevel - 1;
+                            const updatedGameData = validateSkills(isRoMode, gameData, skillId, updatedLevel);
+                            const finalGameData = validateUsedPoint(isRoMode, updatedGameData);
+                            set({ gameData: finalGameData });
+                        }
+                    }
+                }
+            },
+            hover_skill_dependency: (skillId: number, isHover: boolean) => {
+                const gameData = get().gameData;
+                if (gameData === null) return;
+
+                setHoverRecursive(skillId, isHover, gameData);
+                set({ gameData: { ...gameData } });
+            },
+            update_showSkillDescription: (_showSkillDescription: boolean) => {
+                set({ _showSkillDescription });
+            },
+            update_ro_mode: (_roMode: boolean) => {
+                if (_roMode) {
+                    const gameData = get().gameData;
+                    const finalGameData = validateUsedPoint(_roMode, gameData);
+                    set({ gameData: finalGameData });
+                }
+                if (!_roMode) {
+                    const gameData = get().gameData;
+                    if (gameData !== null) {
+                        const newGameData = { ...gameData };
+                        for (const skillTree of Object.values(gameData.skillTree)) {
+                            for (const skill of Object.values(skillTree.skills)) {
+                                skill.skillState.canBeLeveled = true;
+                            }
+                        }
+                        set({ gameData: newGameData });
+                    }
+                }
+                set({ _roMode });
+            },
+            open_character_modal: () => {
+                set({ _characterModal: true });
+            },
+            close_character_modal: () => {
+                set({ _characterModal: false });
+            },
+            open_share_modal: () => {
+                get().share_skill_build();
+                set({ _shareModal: true });
+            },
+            close_share_modal: () => {
+                set({ _shareLink: null });
+                set({ _shareModal: false });
+            },
+            load_skill_build: (build: string, jobData: JobModel[] | undefined) => {
+                try {
+                    const jsonStr = atob(build);
+                    const obj = JSON.parse(jsonStr);
+                    if (
+                        typeof obj === "object" &&
+                        obj !== null &&
+                        typeof obj.job_id === "number" &&
+                        typeof obj.ro_mode === "boolean" &&
+                        typeof obj.skills === "object" &&
+                        obj.skills !== null &&
+                        Object.entries(obj.skills).every(
+                            ([key, value]) => !isNaN(Number(key)) && typeof value === "number"
+                        ) &&
+                        jobData !== undefined
+                    ) {
+                        set({ _characterModal: false });
+                        const loadedObject = obj as ShareModel;
+                        const gameData = jobData.find((x) => x.jobId === loadedObject.job_id);
+                        const isRoMode = loadedObject.ro_mode;
+
+                        if (gameData) {
+                            for (const skillTree of Object.values(gameData.skillTree)) {
+                                for(const [skillId, skillLevel] of Object.entries(loadedObject.skills)){
+                                    const numSkillId = Number(skillId);
+                                    const foundSkill = skillTree.skills[numSkillId];
+                                    if(foundSkill){
+                                        foundSkill.currentLevel = skillLevel;
+                                    }
+                                }
+                            }
+                            console.log(gameData.skillTree);
+                            const validatedGameData = validateSkills(isRoMode, gameData);
+                            get().set_game_data(validatedGameData);
+                            enqueueSnackbar("Build loaded correctly!", { variant: "success" });
+                            return;
+                        }
+
+                        enqueueSnackbar("The shared URL is invalid!", { variant: "warning" });
+                        return;
+                    }
+                } catch {
+                    enqueueSnackbar("The shared URL is incorrect!", { variant: "error" });
+                    return;
+                }
+            },
+            share_skill_build: () => {
+                const gameData = get().gameData;
+                const isRoMode = get()._roMode;
+                if (gameData !== null) {
+                    const skillList: { [key: number]: number } = {};
+                    for (const skillTree of Object.values(gameData.skillTree)) {
+                        for (const skill of Object.values(skillTree.skills)) {
+                            if (skill.currentLevel > 0 && skill.defaultLevel === 0) {
+                                skillList[skill.skillId] = skill.currentLevel;
+                            }
+                        }
+                    }
+                    const output: ShareModel = {
+                        job_id: gameData.jobId,
+                        ro_mode: isRoMode,
+                        skills: skillList,
+                    };
+
+                    const jsonString = JSON.stringify(output);
+                    const base64String = btoa(jsonString);
+
+                    set({ _shareLink: base64String });
+                    return;
+                }
+                set({ _shareLink: null });
+                return;
+            },
+            reset_skills: () => {
+                const gameData = get().gameData;
+                const isRoMode = get()._roMode;
+                if (!gameData) return;
+
+                const newGameData = { ...gameData };
+                newGameData.usedSkillPoints = 0;
+                for (const skillTree of Object.values(gameData.skillTree)) {
+                    for (const skill of Object.values(skillTree.skills)) {
+                        if (skill.defaultLevel === 0) {
+                            skill.currentLevel = 0;
+                        }
+                    }
+                }
+
+                const updatedGameData = validateUsedPoint(isRoMode, newGameData);
+                set({ gameData: updatedGameData });
+            },
+        }),
+        {
+            name: 'skill-storage',
+        }
+    )
+);

@@ -4,19 +4,29 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import JobTooltip from '../JobTooltip/JobTooltip';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { job_list } from '@/constants/joblist';
-import { useStore } from '@/store/useStore';
+import { job_list, get_jobname_by_id } from '@/constants/joblist';
+import { useSkill } from '@/store/useSkill';
+import { JobModel } from '@/models/get-job-skills';
 
-const MobileClassSelect = () => {
+const MobileClassSelect = ({
+    jobData,
+} : {
+    jobData: JobModel[] | undefined;
+}) => {
 
-    const selectedClass = useStore((x) => x.gameClass);
-    const setSelectedJob = useStore((x) => x.set_game_class);
+    const selectedClass = useSkill((x) => x.gameData);
+    const setSelectedJob = useSkill((x) => x.set_game_data);
 
     const handleChange = (e: SelectChangeEvent) => {
         const job_name = e.target.value;
-        if(job_name.length > 0) {
+        if(jobData && job_name.length > 0) {
             const selected = job_list.find((x) => x.name === job_name);
-            setSelectedJob(selected !== undefined ? selected : null);
+            if(selected){
+                const foundJob = jobData.find((x) => x.jobId === selected.id);
+                if(foundJob){
+                    setSelectedJob(foundJob);
+                }
+            }
         }
     };
 
@@ -39,7 +49,7 @@ const MobileClassSelect = () => {
                 <Select
                     id="select-job-name"
                     size="small"
-                    value={selectedClass !== null ? selectedClass.name : ''}
+                    value={selectedClass !== null ? get_jobname_by_id(selectedClass.jobId) : ''}
                     onChange={handleChange}
                     sx={{
                         background: '#FFFFFF',
@@ -57,7 +67,7 @@ const MobileClassSelect = () => {
                             value={x.name}
                         >
                             <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-                                <JobTooltip jobId={x.id} jobName={x.name} isSelected={selectedClass !== null && x.id === selectedClass.id} />
+                                <JobTooltip jobId={x.id} jobName={x.name} isSelected={selectedClass !== null && x.id === selectedClass.jobId} />
                                 {x.name}
                             </Box>
                         </MenuItem>

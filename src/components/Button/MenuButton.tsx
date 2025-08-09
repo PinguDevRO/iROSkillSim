@@ -1,13 +1,13 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { useStore } from '@/store/useStore';
+import { useSkill } from '@/store/useSkill';
 
 const MenuButton = () => {
 
-    const open_modal = useStore((x) => x.open_character_modal);
-    const share_modal = useStore((x) => x.open_share_modal);
-    const reset_skills = useStore((x) => x.reset_skills);
+    const open_modal = useSkill((x) => x.open_character_modal);
+    const share_modal = useSkill((x) => x.open_share_modal);
+    const reset_skills = useSkill((x) => x.reset_skills);
 
     return (
         <Box

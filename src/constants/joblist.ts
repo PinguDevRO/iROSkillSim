@@ -1,6 +1,3 @@
-import { JobSkillModel } from "@/models/get-job-skill";
-import { SkillsModel } from "@/models/get-skills";
-
 export interface JobListModel {
     id: number;
     name: string;
@@ -349,6 +346,14 @@ export const get_jobname_by_id = (id: number): string => {
     return 'Unknown';
 };
 
+export const get_total_skill_point_by_id = (id: number): number => {
+    const foundJob = job_list.find((x) => x.id === id);
+    if(foundJob){
+        return foundJob.skill_points.reduce((acc, curr) => acc + curr, 0);
+    }
+    return -1;
+}
+
 export const get_skill_points_by_id = (id: number, index?: number): number => {
     if (index !== undefined) {
         for (const job of job_list) {
@@ -380,76 +385,4 @@ export const get_expanded_job_id = (id: number): number | null => {
     };
 
     return null;
-};
-
-export const getJobSkillChain = (job: number, jobSkill: JobSkillModel[] | undefined): JobSkillModel[] | null => {
-    if (!jobSkill) return null;
-
-    const jobSkillMap = new Map<number, JobSkillModel>();
-    for (const js of jobSkill) {
-        jobSkillMap.set( js.jobId, {...js, skillTree: [...js.skillTree]} );
-    }
-
-    const output: JobSkillModel[] = [];
-    let currentJobId: number | null = job;
-
-    while (currentJobId !== null) {
-        const found = jobSkillMap.get(currentJobId);
-        if (!found) break;
-
-        const expandedJobId = get_expanded_job_id(found.jobId);
-        if (expandedJobId !== null) {
-            const expanded = jobSkillMap.get(expandedJobId);
-            if (expanded) {
-                found.skillTree = [
-                    ...found.skillTree,
-                    ...expanded.skillTree.filter(
-                        s => !found.skillTree.some(f => f.skillId === s.skillId)
-                    ),
-                ];
-            }
-        }
-
-        output.push(found);
-        currentJobId = found.previousJobId;
-    }
-
-    if (
-        output.length >= 2 &&
-        output.at(-1)!.previousJobId === null &&
-        output.at(-1)!.jobId === 0
-    ) {
-        const last = output.pop()!;
-        const beforeLast = output.at(-1)!;
-        beforeLast.skillTree = [
-            ...last.skillTree.filter(
-                s => !beforeLast.skillTree.some(f => f.skillId === s.skillId)
-            ),
-            ...beforeLast.skillTree,
-        ];
-    }
-
-    return output.reverse();
-};
-
-export const getSkills = (skillChain: JobSkillModel[] | null, skills: SkillsModel[] | undefined): SkillsModel[] | null => {
-    if (!skillChain || !skills) return null;
-
-    const cleanSkills = [...skills];
-    const output: SkillsModel[] = [];
-    const seenSkillIds = new Set<number>();
-
-    for (const jobSkill of skillChain) {
-        for (const skill of jobSkill.skillTree) {
-            if (!seenSkillIds.has(skill.skillId)) {
-                const found = cleanSkills.find((x) => x.skillId === skill.skillId);
-                if (found) {
-                    output.push(found);
-                    seenSkillIds.add(skill.skillId);
-                }
-            }
-        }
-    }
-
-    return output;
 };

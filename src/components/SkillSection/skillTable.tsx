@@ -4,40 +4,40 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from '@mui/material/Typography';
 import Skill from "./skill";
-import { JobSkillPositionModel } from "@/models/get-job-skill";
-import { useStore } from '@/store/useStore';
-import { SkillsModel } from "@/models/get-skills";
+import { SkillModel } from "@/models/get-job-skills";
+import { useSkill } from "@/store/useSkill";
 
 
 const SkillTable = ({
     jobId,
-    skillTreeData,
 }: {
     jobId: number;
-    skillTreeData: JobSkillPositionModel[];
 }) => {
-    const gameSkills = useStore((x) => x.gameSkills);
-    const skillMap = new Map<number, JobSkillPositionModel>();
-    skillTreeData.forEach(skill => skillMap.set(skill.skillPosition, skill));
+    const gameData = useSkill((x) => x.gameData);
+    const skillMap = new Map<number, SkillModel>();
+    const jobSkillTree = gameData?.skillTree[jobId];
+    if(jobSkillTree !== undefined){
+        Object.values(jobSkillTree.skills).forEach(skill => skillMap.set(skill.skillPosition, skill));
+    }
 
-    const levelUpSkill = useStore((x) => x.level_up_skill);
-    const levelDownSkill = useStore((x) => x.level_down_skill);
+    const levelUpSkill = useSkill((x) => x.level_up_skill);
+    const levelDownSkill = useSkill((x) => x.level_down_skill);
 
-    const handleOnLevelUpSkill = (event: MouseEvent<HTMLButtonElement>, skill: SkillsModel) => {
+    const handleOnLevelUpSkill = (event: MouseEvent<HTMLButtonElement>, jobId: number, skill: SkillModel) => {
         if(event.ctrlKey && event.button === 0){
-            levelUpSkill(skill.skillId, skill.maxLevel);
+            levelUpSkill(jobId, skill.skillId, skill.maxLevel);
         }
         else {
-            levelUpSkill(skill.skillId);
+            levelUpSkill(jobId, skill.skillId);
         }
     };
 
-    const handleOnLevelDownSkill = (event: MouseEvent<HTMLButtonElement>, skill: SkillsModel) => {
+    const handleOnLevelDownSkill = (event: MouseEvent<HTMLButtonElement>, jobId: number, skill: SkillModel) => {
         if(event.ctrlKey && event.button === 0){
-            levelDownSkill(skill.skillId, skill.defaultLevel);
+            levelDownSkill(jobId, skill.skillId, skill.defaultLevel);
         }
         else {
-            levelDownSkill(skill.skillId);
+            levelDownSkill(jobId, skill.skillId);
         }
     };
 
@@ -54,7 +54,6 @@ const SkillTable = ({
         >
             {Array.from({ length: 7 * 6 }).map((_, index) => {
                 const skill = skillMap.get(index);
-                const currentSkill = gameSkills?.find((x) => x.skillId === skill?.skillId);
                 return (
                     <Box
                         key={index}
@@ -65,7 +64,7 @@ const SkillTable = ({
                         width={70}
                         height={70}
                     >
-                        {skill && currentSkill ? (
+                        {skill ? (
                             <>
                                 <Typography
                                     color="#828282"
@@ -77,9 +76,9 @@ const SkillTable = ({
                                         maxWidth: 85,
                                     }}
                                 >
-                                    {currentSkill.skillName}
+                                    {skill.skillName}
                                 </Typography>
-                                <Skill jobId={jobId} skillId={skill.skillId} skillName={currentSkill.skillName} skillDescription={currentSkill.skillDescription} hoverData={currentSkill.isHovered} canBeLeveled={currentSkill.canBeLeveled} />
+                                <Skill jobId={jobId} skill={skill} />
                                 <Box
                                     display="flex"
                                     flexDirection="row"
@@ -89,7 +88,7 @@ const SkillTable = ({
                                 >
                                     <IconButton
                                         sx={{
-                                            display: currentSkill.defaultLevel > 0 ? 'none' : 'inline',
+                                            display: skill.defaultLevel > 0 ? 'none' : 'inline',
                                             p: 0,
                                             m: 0,
                                             width: 11,
@@ -99,7 +98,7 @@ const SkillTable = ({
                                                 backgroundColor: 'transparent',
                                             },
                                         }}
-                                        onClick={(e) => handleOnLevelDownSkill(e, currentSkill)}
+                                        onClick={(e) => handleOnLevelDownSkill(e, jobId, skill)}
                                         onContextMenu={handleContextMenu}
                                     >
                                         <Image
@@ -119,11 +118,11 @@ const SkillTable = ({
                                             fontWeight: 700,
                                         }}
                                     >
-                                        {currentSkill.defaultLevel > 0 ? `${currentSkill.maxLevel}` : `${currentSkill.currentLevel} / ${currentSkill.maxLevel}`}
+                                        {skill.defaultLevel > 0 ? `${skill.maxLevel}` : `${skill.currentLevel} / ${skill.maxLevel}`}
                                     </Typography>
                                     <IconButton
                                         sx={{
-                                            display: currentSkill.defaultLevel > 0 ? 'none' : 'inline',
+                                            display: skill.defaultLevel > 0 ? 'none' : 'inline',
                                             p: 0,
                                             m: 0,
                                             width: 11,
@@ -133,7 +132,7 @@ const SkillTable = ({
                                                 backgroundColor: 'transparent',
                                             },
                                         }}
-                                        onClick={(e) => handleOnLevelUpSkill(e, currentSkill)}
+                                        onClick={(e) => handleOnLevelUpSkill(e, jobId, skill)}
                                         onContextMenu={handleContextMenu}
                                     >
                                         <Image

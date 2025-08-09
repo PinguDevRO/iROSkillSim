@@ -9,7 +9,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { enqueueSnackbar } from 'notistack';
 import { SxProps } from '@mui/material';
-import { useStore } from '@/store/useStore';
+import { useSkill } from '@/store/useSkill';
 
 const MainModalStyle: SxProps = {
     display: 'flex',
@@ -30,9 +30,9 @@ const MainModalStyle: SxProps = {
 const ShareModal = () => {
 
     const [origin, setOrigin] = useState<string>('');
-    const open = useStore((x) => x._shareModal);
-    const close = useStore((x) => x.close_share_modal);
-    const skillBuild = useStore((x) => x._shareLink);
+    const open = useSkill((x) => x._shareModal);
+    const close = useSkill((x) => x.close_share_modal);
+    const skillBuild = useSkill((x) => x._shareLink);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {

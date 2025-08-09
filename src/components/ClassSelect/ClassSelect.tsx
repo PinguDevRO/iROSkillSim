@@ -6,7 +6,8 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { job_list, get_jobname_by_id, JobListModel } from '@/constants/joblist';
 import { SxProps } from '@mui/material';
-import { useStore } from '@/store/useStore';
+import { useSkill } from '@/store/useSkill';
+import { JobModel } from '@/models/get-job-skills';
 
 const MainModalStyle: SxProps = {
     display: { xs: 'none', md: 'flex' },
@@ -25,7 +26,11 @@ const MainModalStyle: SxProps = {
 };
 
 
-const ClassSelect = () => {
+const ClassSelect = ({
+    jobData,
+} : {
+    jobData: JobModel[] | undefined;
+}) => {
 
     const maxPage = 2;
     const maxChar = 15;
@@ -37,12 +42,17 @@ const ClassSelect = () => {
     const [closeButtonHover, setCloseButtonHover] = useState<boolean>(false);
     const [selectedCharacter, setSelectedCharacter] = useState<JobListModel | null>(null);
 
-    const open = useStore((x) => x._characterModal);
-    const close = useStore((x) => x.close_character_modal);
-    const setGameClass = useStore((x) => x.set_game_class);
+    const open = useSkill((x) => x._characterModal);
+    const close = useSkill((x) => x.close_character_modal);
+    const setGameData = useSkill((x) => x.set_game_data);
 
     const handleOnJobSelection = () => {
-        setGameClass(selectedCharacter);
+        if(jobData && selectedCharacter){
+            const foundJob = jobData.find((x) => x.jobId === selectedCharacter.id);
+            if(foundJob){
+                setGameData(foundJob);
+            }
+        }
         close();
     };
 
