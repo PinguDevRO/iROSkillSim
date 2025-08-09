@@ -10,6 +10,76 @@ interface ShareModel {
     skills: { [key: number]: number };
 };
 
+const encodeSharedURL = (model: ShareModel): string => {
+    const bits: number[] = [];
+
+    const pushBits = (value: number, length: number) => {
+        for (let i = length - 1; i >= 0; i--) {
+            bits.push((value >> i) & 1);
+        }
+    };
+
+    pushBits(model.job_id, 14);
+
+    pushBits(model.ro_mode ? 1 : 0, 1);
+
+    for (const [keyStr, level] of Object.entries(model.skills)) {
+        const key = parseInt(keyStr, 10);
+        pushBits(key, 14);
+        pushBits(level, 7);
+    }
+
+    const bytes = [];
+    for (let i = 0; i < bits.length; i += 8) {
+        let byte = 0;
+        for (let j = 0; j < 8; j++) {
+            if (i + j < bits.length) {
+                byte = (byte << 1) | bits[i + j];
+            } else {
+                byte <<= 1;
+            }
+        }
+        bytes.push(byte);
+    }
+
+    const binary = String.fromCharCode(...bytes);
+    const b64 = btoa(binary);
+    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+const decodeSharedURL = (encoded: string): ShareModel => {
+    const b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const binary = atob(b64);
+    const bytes = binary.split('').map(c => c.charCodeAt(0));
+
+    const bits: number[] = [];
+    for (const byte of bytes) {
+        for (let i = 7; i >= 0; i--) {
+            bits.push((byte >> i) & 1);
+        }
+    }
+
+    const readBits = (len: number) => {
+        let val = 0;
+        for (let i = 0; i < len; i++) {
+            val = (val << 1) | bits.shift()!;
+        }
+        return val;
+    };
+
+    const job_id = readBits(14);
+    const ro_mode = !!readBits(1);
+
+    const skills: Record<number, number> = {};
+    while (bits.length >= 21) {
+        const key = readBits(14);
+        const level = readBits(7);
+        skills[key] = level;
+    }
+
+    return { job_id, ro_mode, skills };
+};
+
 const updateUsedSkillPoints = (gameData: JobModel): void => {
     gameData.usedSkillPoints = 0;
     for (const skillTree of Object.values(gameData.skillTree)) {
@@ -26,33 +96,43 @@ const updateUsedSkillPoints = (gameData: JobModel): void => {
 const validateUsedPoint = (isRoMode: boolean, gameData: JobModel | null): JobModel | null => {
     if (!gameData) return gameData;
     updateUsedSkillPoints(gameData);
-    if (!isRoMode) return gameData;
 
     const skillTrees = Object.values(gameData.skillTree);
 
     if (skillTrees.length === 0) return gameData;
 
-    let resetFrom = 0;
-    for (let i = 0; i < skillTrees.length; i++) {
-        if (skillTrees[i].usedSkillPoints < skillTrees[i].skillPoints) {
-            resetFrom = i;
-            break;
+    if (isRoMode) {
+        let resetFrom = 0;
+        for (let i = 0; i < skillTrees.length; i++) {
+            if (skillTrees[i].usedSkillPoints < skillTrees[i].skillPoints) {
+                resetFrom = i;
+                break;
+            }
         }
-    }
 
-    for (const skillTree of skillTrees.slice(resetFrom)) {
-        for (const skill of Object.values(skillTree.skills)) {
-            if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
-                skill.skillState = { ...skill.skillState, canBeLeveled: true };
+        for (const skillTree of skillTrees.slice(resetFrom)) {
+            for (const skill of Object.values(skillTree.skills)) {
+                if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
+                    skill.skillState = { ...skill.skillState, canBeLeveled: true };
+                }
+            }
+        }
+
+        for (const skillTree of skillTrees.slice(resetFrom + 1)) {
+            for (const skill of Object.values(skillTree.skills)) {
+                if (skill.defaultLevel === 0) {
+                    skill.currentLevel = 0;
+                    skill.skillState = { ...skill.skillState, canBeLeveled: false };
+                }
             }
         }
     }
-
-    for (const skillTree of skillTrees.slice(resetFrom + 1)) {
-        for (const skill of Object.values(skillTree.skills)) {
-            if (skill.defaultLevel === 0) {
-                skill.currentLevel = 0;
-                skill.skillState = { ...skill.skillState, canBeLeveled: false };
+    else {
+        for (const skillTree of skillTrees) {
+            for (const skill of Object.values(skillTree.skills)) {
+                if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
+                    skill.skillState = { ...skill.skillState, canBeLeveled: true };
+                }
             }
         }
     }
@@ -262,7 +342,7 @@ export const useSkill = create<State>()(
                 if (jobSkillTree !== undefined) {
                     const skill = jobSkillTree.skills[skillId];
                     if (skill !== undefined) {
-                        if(skill.currentLevel < skill.maxLevel){
+                        if (skill.currentLevel < skill.maxLevel) {
                             const updatedLevel = maxLevel !== undefined && maxLevel === skill.maxLevel ? maxLevel : skill.currentLevel + 1;
                             const updatedGameData = validateSkills(isRoMode, gameData, skillId, updatedLevel);
                             const finalGameData = validateUsedPoint(isRoMode, updatedGameData);
@@ -281,7 +361,7 @@ export const useSkill = create<State>()(
                 if (jobSkillTree !== undefined) {
                     const skill = jobSkillTree.skills[skillId];
                     if (skill !== undefined) {
-                        if(skill.currentLevel > 0){
+                        if (skill.currentLevel > 0) {
                             const updatedLevel = minLevel !== undefined && minLevel === skill.defaultLevel ? minLevel : skill.currentLevel - 1;
                             const updatedGameData = validateSkills(isRoMode, gameData, skillId, updatedLevel);
                             const finalGameData = validateUsedPoint(isRoMode, updatedGameData);
@@ -339,46 +419,44 @@ export const useSkill = create<State>()(
             },
             load_skill_build: (build: string, jobData: JobModel[] | undefined) => {
                 try {
-                    const jsonStr = atob(build);
-                    const obj = JSON.parse(jsonStr);
-                    if (
-                        typeof obj === "object" &&
-                        obj !== null &&
-                        typeof obj.job_id === "number" &&
-                        typeof obj.ro_mode === "boolean" &&
-                        typeof obj.skills === "object" &&
-                        obj.skills !== null &&
-                        Object.entries(obj.skills).every(
-                            ([key, value]) => !isNaN(Number(key)) && typeof value === "number"
-                        ) &&
-                        jobData !== undefined
-                    ) {
-                        set({ _characterModal: false });
-                        const loadedObject = obj as ShareModel;
-                        const gameData = jobData.find((x) => x.jobId === loadedObject.job_id);
-                        const isRoMode = loadedObject.ro_mode;
-                        get().set_ro_mode(isRoMode);
+                    const loadedObject: ShareModel = decodeSharedURL(build);
+                    set({ _characterModal: false });
+                    const gameData = jobData?.find((x) => x.jobId === loadedObject.job_id);
+                    const isRoMode = loadedObject.ro_mode;
+                    get().set_ro_mode(isRoMode);
 
-                        if (gameData) {
-                            for (const skillTree of Object.values(gameData.skillTree)) {
-                                for(const [skillId, skillLevel] of Object.entries(loadedObject.skills)){
-                                    const numSkillId = Number(skillId);
-                                    const foundSkill = skillTree.skills[numSkillId];
-                                    if(foundSkill){
-                                        foundSkill.currentLevel = skillLevel;
+                    if (gameData) {
+                        for (const skillTree of Object.values(gameData.skillTree)) {
+                            for (const [skillId, skillLevel] of Object.entries(loadedObject.skills)) {
+                                const numSkillId = Number(skillId);
+                                const foundSkill = skillTree.skills[numSkillId];
+                                if (foundSkill) {
+                                    if (skillLevel > foundSkill.maxLevel || skillLevel < foundSkill.defaultLevel) {
+                                        enqueueSnackbar("The shared URL is incorrect!", { variant: "error" });
+                                        return;
                                     }
                                 }
                             }
-
-                            const validatedGameData = validateSkills(isRoMode, gameData);
-                            get().set_game_data(validatedGameData);
-                            enqueueSnackbar("Build loaded correctly!", { variant: "success" });
-                            return;
                         }
 
-                        enqueueSnackbar("The shared URL is invalid!", { variant: "warning" });
+                        for (const skillTree of Object.values(gameData.skillTree)) {
+                            for (const [skillId, skillLevel] of Object.entries(loadedObject.skills)) {
+                                const numSkillId = Number(skillId);
+                                const foundSkill = skillTree.skills[numSkillId];
+                                if (foundSkill) {
+                                    foundSkill.currentLevel = skillLevel;
+                                }
+                            }
+                        }
+
+                        const validatedGameData = validateSkills(isRoMode, gameData);
+                        get().set_game_data(validatedGameData);
+                        enqueueSnackbar("Build loaded correctly!", { variant: "success" });
                         return;
                     }
+
+                    enqueueSnackbar("The shared URL is invalid!", { variant: "warning" });
+                    return;
                 } catch {
                     enqueueSnackbar("The shared URL is incorrect!", { variant: "error" });
                     return;
@@ -402,10 +480,9 @@ export const useSkill = create<State>()(
                         skills: skillList,
                     };
 
-                    const jsonString = JSON.stringify(output);
-                    const base64String = btoa(jsonString);
+                    const shareURL = encodeSharedURL(output);
 
-                    set({ _shareLink: base64String });
+                    set({ _shareLink: shareURL });
                     return;
                 }
                 set({ _shareLink: null });
