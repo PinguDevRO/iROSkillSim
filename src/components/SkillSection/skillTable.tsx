@@ -13,11 +13,25 @@ const SkillTable = ({
 }: {
     jobId: number;
 }) => {
+
+    let GRID_ROWS = 6;
+    const GRID_COLUMNS = 7;
+
     const gameData = useSkill((x) => x.gameData);
     const skillMap = new Map<number, SkillModel>();
     const jobSkillTree = gameData?.skillTree[jobId];
     if(jobSkillTree !== undefined){
-        Object.values(jobSkillTree.skills).forEach(skill => skillMap.set(skill.skillPosition, skill));
+        let max_skill_position = 0;
+        const skillValues = Object.values(jobSkillTree.skills);
+        skillValues.forEach(skill => {
+            if(skill.skillPosition > max_skill_position){
+                max_skill_position = skill.skillPosition;
+            }
+            skillMap.set(skill.skillPosition, skill);
+        });
+        if(max_skill_position > GRID_COLUMNS * GRID_ROWS){
+            GRID_ROWS = Math.ceil(max_skill_position / GRID_COLUMNS);
+        }
     }
 
     const levelUpSkill = useSkill((x) => x.level_up_skill);
@@ -51,8 +65,14 @@ const SkillTable = ({
             gridTemplateColumns="repeat(7, 1fr)"
             gridTemplateRows="repeat(6, 1fr)"
             columnGap={3}
+            width={670}
+            height={420}
+            sx={{
+                overflowX: "hidden",
+                overflowY: "auto"
+            }}
         >
-            {Array.from({ length: 7 * 6 }).map((_, index) => {
+            {Array.from({ length: GRID_COLUMNS * GRID_ROWS }).map((_, index) => {
                 const skill = skillMap.get(index);
                 return (
                     <Box
@@ -100,6 +120,7 @@ const SkillTable = ({
                                         }}
                                         onClick={(e) => handleOnLevelDownSkill(e, jobId, skill)}
                                         onContextMenu={handleContextMenu}
+                                        disabled={!skill.skillState.canBeLeveled}
                                     >
                                         <Image
                                             src={'/game_interface/arw_left.png'}
@@ -134,6 +155,7 @@ const SkillTable = ({
                                         }}
                                         onClick={(e) => handleOnLevelUpSkill(e, jobId, skill)}
                                         onContextMenu={handleContextMenu}
+                                        disabled={!skill.skillState.canBeLeveled}
                                     >
                                         <Image
                                             src={'/game_interface/arw_right.png'}

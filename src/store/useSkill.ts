@@ -102,27 +102,34 @@ const validateUsedPoint = (isRoMode: boolean, gameData: JobModel | null): JobMod
     if (skillTrees.length === 0) return gameData;
 
     if (isRoMode) {
-        let resetFrom = 0;
+        let resetFrom = -1;
+        let totalSkillPointAcc = 0;
+        let usedSkillPointAcc = 0;
         for (let i = 0; i < skillTrees.length; i++) {
-            if (skillTrees[i].usedSkillPoints < skillTrees[i].skillPoints) {
+            totalSkillPointAcc += skillTrees[i].skillPoints;
+            usedSkillPointAcc += skillTrees[i].usedSkillPoints;
+            if (usedSkillPointAcc < totalSkillPointAcc) {
                 resetFrom = i;
                 break;
             }
         }
-
-        for (const skillTree of skillTrees.slice(resetFrom)) {
-            for (const skill of Object.values(skillTree.skills)) {
-                if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
-                    skill.skillState = { ...skill.skillState, canBeLeveled: true };
+        if (resetFrom >= 0) {
+            for (const skillTree of skillTrees.slice(resetFrom)) {
+                for (const skill of Object.values(skillTree.skills)) {
+                    if (skill.defaultLevel === 0 || skill.defaultLevel > 0) {
+                        skill.skillState = { ...skill.skillState, canBeLeveled: true };
+                    }
                 }
             }
-        }
 
-        for (const skillTree of skillTrees.slice(resetFrom + 1)) {
-            for (const skill of Object.values(skillTree.skills)) {
-                if (skill.defaultLevel === 0) {
-                    skill.currentLevel = 0;
-                    skill.skillState = { ...skill.skillState, canBeLeveled: false };
+            if (resetFrom < (skillTrees.length - 1)) {
+                for (const skillTree of skillTrees.slice(resetFrom + 1)) {
+                    for (const skill of Object.values(skillTree.skills)) {
+                        if (skill.defaultLevel === 0) {
+                            skill.currentLevel = 0;
+                            skill.skillState = { ...skill.skillState, canBeLeveled: false };
+                        }
+                    }
                 }
             }
         }
@@ -223,12 +230,6 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
         }
     }
 
-    if (isRoMode) {
-        if (gameData.usedSkillPoints > gameData.skillPoints) {
-            return gameData;
-        }
-    }
-
     const updatedSkillTree: { [jobId: number]: SkillTreeModel } = {};
 
     for (const [jobIdStr, skillTree] of Object.entries(gameData.skillTree)) {
@@ -249,12 +250,18 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
         };
     }
 
-    updateUsedSkillPoints(gameData);
+    const defaultGameData = {...gameData};
+    const updatedGameData = {...gameData, skillTree: updatedSkillTree};
 
-    return {
-        ...gameData,
-        skillTree: updatedSkillTree,
-    };
+    updateUsedSkillPoints(updatedGameData);
+    if (isRoMode) {
+        if (updatedGameData.usedSkillPoints > updatedGameData.skillPoints) {
+            updateUsedSkillPoints(defaultGameData);
+            return defaultGameData;
+        }
+    }
+
+    return updatedGameData;
 };
 
 const setHoverRecursive = (skillId: number, isHover: boolean, gameData: JobModel, visited = new Set<number>(), neededLevel?: number): void => {
@@ -314,7 +321,7 @@ export type State = {
 };
 
 export const initialState = {
-    _roMode: true,
+    _roMode: false,
     _showSkillDescription: false,
     _characterModal: true,
     _shareModal: false,

@@ -83,6 +83,7 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
     }
 
     for (const job of job_list) {
+        const jobIdList = new Map<number, number>();
         const jobAmount = previousJobs[job.id].length;
 
         const newJob: JobModel = {
@@ -93,6 +94,8 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
         };
 
         for (const [index, group] of previousJobs[job.id].entries()) {
+            if(!jobIdList.has(group[0])) jobIdList.set(group[0], group[0]);
+
             const newSkillTree: SkillTreeModel = {
                 jobId: group[0],
                 jobName: get_jobname_by_id(group[0]),
@@ -178,6 +181,9 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
 
                     newSkillTree.skills[skill.skill_id] = newSkill;
                 }
+
+                newSkillTree.jobId = expandedJob;
+                jobIdList.set(expandedJob, expandedJob);
             }
 
             newJob.skillTree[group[0]] = newSkillTree;
@@ -192,7 +198,19 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
 
         for (const skillTree of Object.values(newJob.skillTree)) {
             for (const skill of Object.values(skillTree.skills)) {
-                skill.neededSkills = skill.neededSkills.filter((req) => allSkillIds.has(req.skillId));
+                let filtered = skill.neededSkills.filter((req) =>
+                    allSkillIds.has(req.skillId) && (req.jobId === null || jobIdList.has(req.jobId))
+                );
+
+                const hasNonNullJobMatch = filtered.some(
+                    (req) => req.jobId !== null && allSkillIds.has(req.skillId)
+                );
+
+                if (hasNonNullJobMatch) {
+                    filtered = filtered.filter((req) => req.jobId !== null);
+                }
+
+                skill.neededSkills = filtered;
             }
         }
 

@@ -130,6 +130,7 @@ const MobileSkillTable = ({
                                                 onTouchStart={startPressTimer}
                                                 onTouchEnd={() => handleTouchEndDown(jobId, skill.skillId, skill.defaultLevel)}
                                                 onContextMenu={handleContextMenu}
+                                                disabled={!skill.skillState.canBeLeveled}
                                             >
                                                 <Image
                                                     src={'/game_interface/arw_left.png'}
@@ -166,6 +167,7 @@ const MobileSkillTable = ({
                                                 onTouchStart={startPressTimer}
                                                 onTouchEnd={() => handleTouchEndUp(jobId, skill.skillId, skill.maxLevel)}
                                                 onContextMenu={handleContextMenu}
+                                                disabled={!skill.skillState.canBeLeveled}
                                             >
                                                 <Image
                                                     src={'/game_interface/arw_right.png'}

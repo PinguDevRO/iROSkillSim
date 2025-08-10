@@ -44,21 +44,21 @@ html, body, #__next {
 }
 
 ::-webkit-scrollbar-track {
-  background: #2e2e2e;
+  background: #466ec0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #704a78;
+  background-color: #90b0ea;
   border-radius: 10px;
-  border: 2px solid #2e2e2e;
+  border: 2px solid #466ec0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #8c5c94;
+  background-color: #7fa1e1;
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #704a78 #2e2e2e;
+  scrollbar-color: #90b0ea #d5dfdf;
 }
