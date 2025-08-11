@@ -14,6 +14,7 @@ import Container from '@mui/material/Container';
 import Skeleton from '@mui/material/Skeleton';
 import CircleIcon from '@mui/icons-material/Circle';
 import WarningIcon from '@mui/icons-material/Warning';
+import MenuList from './MenuList';
 import { CustomTypography } from "@/utils/component_utils";
 import { red, orange, green, yellow } from '@mui/material/colors';
 import { COLORS } from '@/theme/colors';
@@ -56,15 +57,21 @@ const ServerStatus = ({
       flexDirection={{ xs: "column", md: "row" }}
       alignItems="center"
       justifyContent="end"
-      gap={2}
+      gap={{ xs: 1, md: 4 }}
       paddingBottom={{ xs: 2, md: 0 }}
     >
-      <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} paddingX={4}>
+      <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
         {endpoints !== undefined && endpoints.getServerStatus !== undefined && endpoints.getServerStatus.loading ? (
           <Skeleton width="100%" animation="wave" />
         ) : (
           model !== undefined && model.serverStatusData !== undefined && model.serverStatusData.globalStatus.map((x, idx) => (
-            <Box key={'global-status-' + idx} display="flex" flexDirection="row" alignItems="center" gap={0.5}>
+            <Box
+              key={'global-status-' + idx}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              gap={1}
+            >
               <CircleIcon sx={{ color: GetStatusColor(x) }} />
               {x.name === 'Zone' ? (
                 <CustomTypography
@@ -101,7 +108,7 @@ const ServerStatus = ({
           ))
         )}
       </Box>
-      <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} paddingX={4}>
+      <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
         {endpoints !== undefined && endpoints.getServerStatus !== undefined && endpoints.getServerStatus.loading ? (
           <>
             <Box key={'total-players-value'} flexGrow={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5}>
@@ -278,6 +285,42 @@ const ServerStatus = ({
           <></>
         )}
       </Box>
+      <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
+        {endpoints !== undefined && endpoints.getServerStatus !== undefined && endpoints.getServerStatus.loading ? (
+          <Skeleton width="100%" animation="wave" />
+        ) : (
+          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5} >
+            <CustomTypography
+              color={COLORS.internal_link_text}
+              variant="body2"
+              component="div"
+              sx={{
+                flexGrow: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontWeight: 700,
+              }}
+            >
+              Server Time (PDT/PST)
+            </CustomTypography>
+            <CustomTypography
+              color={COLORS.third_background_text}
+              variant="caption"
+              component="div"
+              sx={{
+                flexGrow: 1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontWeight: 700,
+              }}
+            >
+              {model !== undefined && model.serverStatusData !== undefined && model.serverStatusData.lastUpdate ? model.serverStatusData.lastUpdateServerTime : ''}
+            </CustomTypography>
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 };
@@ -308,7 +351,6 @@ const AppBarMenu = ({
             flexDirection={{ xs: 'column', md: 'row' }}
             alignItems={{ xs: 'stretch', md: 'center' }}
             justifyContent="space-between"
-            gap={2}
             paddingTop={{ xs: 2, md: 0 }}
             position="relative"
           >
@@ -322,7 +364,7 @@ const AppBarMenu = ({
                 xs: 'center',
                 md: 'flex-start',
               }}
-              gap={2}
+              gap={{ xs: 1, md: 2 }}
             >
               <Image
                 src="/logo.png"
@@ -346,6 +388,7 @@ const AppBarMenu = ({
               >
                 Skill Simulator
               </CustomTypography>
+              <MenuList />
             </Box>
             <ServerStatus model={model} endpoints={endpoints} />
           </Box>

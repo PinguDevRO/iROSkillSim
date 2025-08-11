@@ -1,7 +1,9 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import timezone from "dayjs/plugin/timezone";
 
 dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type ComparizonType = "greater" | "less"
 
@@ -33,4 +35,8 @@ export const isoStringToFormat = (stringDate: string, format: string): string =>
 
 export const getCurrentDate = (): Date => {
   return dayjs().toDate();
+};
+
+export const convertUTCtoPDT = (dt: string): string => {
+  return dayjs.utc(dt).tz("America/Los_Angeles").format("MMMM D, YYYY h:mm A");
 };

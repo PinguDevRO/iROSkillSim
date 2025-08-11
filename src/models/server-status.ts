@@ -1,5 +1,5 @@
 import { GetServerStatusResponse } from "@/services/server-status";
-import { formatDate } from "@/utils/date_utils";
+import { formatDate, convertUTCtoPDT } from "@/utils/date_utils";
 
 export interface StatusModel {
     name: string;
@@ -48,6 +48,7 @@ export interface ServerStatusModel {
     playerCounts: ServerListCountModel;
     scheduledMaintenance: ScheduledMaintenanceModel;
     lastUpdate: string;
+    lastUpdateServerTime: string;
 };
 
 const ServerStatusToModel = (data: GetServerStatusResponse): ServerStatusModel => {
@@ -110,7 +111,8 @@ const ServerStatusToModel = (data: GetServerStatusResponse): ServerStatusModel =
         services: services,
         playerCounts: playerCounts,
         scheduledMaintenance: scheduledMaintenance,
-        lastUpdate: formatDate(data.last_update)
+        lastUpdate: formatDate(data.last_update),
+        lastUpdateServerTime: convertUTCtoPDT(data.last_update),
     };
 
     return output;

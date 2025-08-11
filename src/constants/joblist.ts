@@ -179,7 +179,7 @@ export const job_list: JobListModel[] = [
     },
     {
         id: 4257,
-        name: "Windhawk",
+        name: "Wind Hawk",
         skill_points: [
             job_skill_point.first_class,
             job_skill_point.second_class,
