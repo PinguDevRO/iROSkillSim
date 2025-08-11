@@ -110,6 +110,6 @@ export const AxiosImage = async (
 
 const getHeaders = (): Partial<RawAxiosRequestHeaders> => {
     return {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
     }
 };

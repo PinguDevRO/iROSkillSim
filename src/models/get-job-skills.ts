@@ -20,11 +20,13 @@ export interface SkillModel {
     skillCode: string;
     skillName: string;
     skillDescription: string[];
+    skillType: string | null;
     skillPosition: number;
     defaultLevel: number;
     currentLevel: number;
     maxLevel: number;
-    sp: number[];
+    sp: number[] | null;
+    ap: number[] | null;
     attackRange: number[];
     neededSkills: NeededSkillModel[];
     skillState: SkillStateModel;
@@ -125,11 +127,13 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
                         skillCode: foundSkill.skill_code,
                         skillName: foundSkill.skill_name,
                         skillDescription: foundSkill.skill_description,
+                        skillType: foundSkill.skill_type ?? null,
                         skillPosition: skill.skill_position,
                         defaultLevel: defaultLevel ?? 0,
                         currentLevel: defaultLevel ?? 0,
                         maxLevel: foundSkill.max_level,
-                        sp: foundSkill.sp,
+                        sp: foundSkill.sp ?? null,
+                        ap: foundSkill.ap ?? null,
                         attackRange: foundSkill.attack_range,
                         neededSkills,
                         skillState: {
@@ -165,11 +169,13 @@ const JobSkillsToModel = (jobData: GetJobSkillResponse[] | null | undefined, ski
                         skillCode: foundSkill.skill_code,
                         skillName: foundSkill.skill_name,
                         skillDescription: foundSkill.skill_description,
+                        skillType: foundSkill.skill_type ?? null,
                         skillPosition: skill.skill_position,
                         defaultLevel: defaultLevel ?? 0,
                         currentLevel: defaultLevel ?? 0,
                         maxLevel: foundSkill.max_level,
-                        sp: foundSkill.sp,
+                        sp: foundSkill.sp ?? null,
+                        ap: foundSkill.ap ?? null,
                         attackRange: foundSkill.attack_range,
                         neededSkills,
                         skillState: {

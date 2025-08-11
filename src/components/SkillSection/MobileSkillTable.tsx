@@ -5,7 +5,6 @@ import IconButton from "@mui/material/IconButton";
 import Typography from '@mui/material/Typography';
 import Skill from "./skill";
 import { SkillModel } from "@/models/get-job-skills";
-import { ap_skills } from "@/constants/skilllist";
 import { useSkill } from "@/store/useSkill";
 
 
@@ -193,7 +192,7 @@ const MobileSkillTable = ({
                                                     fontWeight: 700,
                                                 }}
                                             >
-                                                {skill.sp.length > 0 && skill.defaultLevel === 0 && skill.currentLevel === 0 ? 'Lv Up' : skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 && ap_skills.includes(skill.skillId) ? `AP: ${skill.sp[skill.currentLevel - 1]}` : skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 && !ap_skills.includes(skill.skillId) ? `Sp: ${skill.sp[skill.currentLevel - 1]}` : skill.sp.length > 0 && skill.defaultLevel > 0 && skill.sp[0] > 0 ? `Sp: ${skill.sp[0]}` : 'Passive'}
+                                                {skill.sp && skill.sp.length > 0 && skill.defaultLevel === 0 && skill.currentLevel === 0 ? 'Lv Up' : skill.ap && skill.sp && skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 ? `Sp: ${skill.ap[skill.currentLevel - 1]}, Ap: ${skill.sp[skill.currentLevel - 1]}` : skill.sp && skill.sp.length > 0 && skill.defaultLevel === 0 && skill.sp[skill.currentLevel - 1] > 0 ? `Sp: ${skill.sp[skill.currentLevel - 1]}` : skill.sp && skill.sp.length > 0 && skill.defaultLevel > 0 && skill.sp[0] > 0 ? `Sp: ${skill.sp[0]}` : 'Passive'}
                                             </Typography>
                                         </Box>
                                     </Box>

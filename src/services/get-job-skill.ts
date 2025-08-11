@@ -12,7 +12,7 @@ export interface GetJobSkillResponse {
 
 const GetJobSkill = async (): Promise<GetJobSkillResponse[] |  null> => {
     const url = process.env.NEXT_PUBLIC_IROWIKI_JOB_METADATA_URL ? process.env.NEXT_PUBLIC_IROWIKI_JOB_METADATA_URL : "";
-    const response: AxiosResponse<GetJobSkillResponse[] | null> = await AxiosGet(url);
+    const response: AxiosResponse<GetJobSkillResponse[] | null> = await AxiosGet(`${url}?cache_bust=${Date.now()}`);
     if(response.status === 200){
         return response.data;
     }
