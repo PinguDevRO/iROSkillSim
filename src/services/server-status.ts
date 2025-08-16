@@ -80,7 +80,7 @@ export interface CalculatorUpdateResponse {
 
 const GetServerStatus = async (): Promise<GetServerStatusResponse |  null> => {
     const url = process.env.NEXT_PUBLIC_IROWIKI_SERVER_STATUS_URL ? process.env.NEXT_PUBLIC_IROWIKI_SERVER_STATUS_URL : "";
-    const response: AxiosResponse<GetServerStatusResponse | null> = await AxiosGet(url);
+    const response: AxiosResponse<GetServerStatusResponse | null> = await AxiosGet(`${url}?cache_bust=${Date.now()}`);
     if(response.status === 200){
         return response.data;
     }

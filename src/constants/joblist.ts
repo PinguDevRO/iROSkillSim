@@ -5,6 +5,7 @@ export interface JobListModel {
 };
 
 export interface JobSkillPointModel {
+    woe: number;
     first_class: number;
     second_class: number;
     third_class: number;
@@ -22,6 +23,7 @@ export interface JobSkillPointModel {
 };
 
 export const job_skill_point: JobSkillPointModel = {
+    woe: 49,
     first_class: 49,
     second_class: 69,
     third_class: 69,
@@ -134,6 +136,7 @@ export const job_names: { [key: number]: string } = {
     4306: "Night Watch",
     4307: "Hyper Novice",
     4308: "Spirit Handler",
+    10000: "WoE",
 };
 
 export const job_list: JobListModel[] = [
@@ -329,6 +332,13 @@ export const job_list: JobListModel[] = [
         skill_points: [
             job_skill_point.summoner,
             job_skill_point.fourth_class_expanded_2,
+        ],
+    },
+    {
+        id: 10000,
+        name: "WoE",
+        skill_points: [
+            job_skill_point.woe,
         ],
     },
 ];

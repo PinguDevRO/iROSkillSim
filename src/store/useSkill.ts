@@ -250,8 +250,8 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
         };
     }
 
-    const defaultGameData = {...gameData};
-    const updatedGameData = {...gameData, skillTree: updatedSkillTree};
+    const defaultGameData = { ...gameData };
+    const updatedGameData = { ...gameData, skillTree: updatedSkillTree };
 
     updateUsedSkillPoints(updatedGameData);
     if (isRoMode) {
@@ -265,9 +265,6 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
 };
 
 const setHoverRecursive = (skillId: number, isHover: boolean, gameData: JobModel, visited = new Set<number>(), neededLevel?: number): void => {
-    if (visited.has(skillId)) return;
-    visited.add(skillId);
-
     let match: SkillModel | undefined;
 
     for (const skillTree of Object.values(gameData.skillTree)) {
@@ -280,10 +277,26 @@ const setHoverRecursive = (skillId: number, isHover: boolean, gameData: JobModel
 
     if (!match) return;
 
+    const currentLevel = match.skillState?.skillLevel ?? 0;
+    const newLevel = neededLevel ?? 0;
+
+    if (visited.has(skillId)) {
+        if (isHover && newLevel > currentLevel) {
+            match.skillState = {
+                ...match.skillState,
+                state: isHover,
+                skillLevel: newLevel,
+            };
+        }
+        return;
+    }
+
+    visited.add(skillId);
+
     match.skillState = {
         ...match.skillState,
         state: isHover,
-        skillLevel: neededLevel !== undefined && isHover ? neededLevel : 0,
+        skillLevel: isHover ? Math.max(currentLevel, newLevel) : 0,
     };
 
     const jobIds = Object.keys(gameData.skillTree).map(Number);
