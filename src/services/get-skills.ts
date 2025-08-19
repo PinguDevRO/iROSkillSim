@@ -22,7 +22,6 @@ export interface GetSkillsResponse {
 const GetSkills = async (): Promise<GetSkillsResponse[] |  null> => {
     const url = process.env.NEXT_PUBLIC_IROWIKI_SKILL_METADATA_URL ? process.env.NEXT_PUBLIC_IROWIKI_SKILL_METADATA_URL : "";
     const response: AxiosResponse<GetSkillsResponse[] | null> = await AxiosGet(`${url}?cache_bust=${Date.now()}`);
-    console.log(response.data);
     if(response.status === 200){
         return response.data;
     }

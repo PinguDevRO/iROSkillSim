@@ -93,7 +93,7 @@ const SkillTable = ({
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
-                                        maxWidth: 85,
+                                        maxWidth: 70,
                                     }}
                                 >
                                     {skill.skillName}

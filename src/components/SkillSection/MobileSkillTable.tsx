@@ -16,7 +16,7 @@ const MobileSkillTable = ({
     const gameData = useSkill((x) => x.gameData);
     const skillMap = new Map<number, SkillModel>();
     const jobSkillTree = gameData?.skillTree[jobId];
-    if(jobSkillTree !== undefined){
+    if (jobSkillTree !== undefined) {
         Object.values(jobSkillTree.skills).forEach(skill => skillMap.set(skill.skillPosition, skill));
     }
 

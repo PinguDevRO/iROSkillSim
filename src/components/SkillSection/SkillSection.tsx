@@ -4,17 +4,26 @@ import Typography from '@mui/material/Typography';
 import SkillTable from './skillTable';
 import MobileSkillTable from './MobileSkillTable';
 import MobileClassSelect from '../ClassSelect/MobileClassSelect';
-import { JobModel } from '@/models/get-job-skills';
+import { useTheme, useMediaQuery } from "@mui/material";
+import { JobModel, SkillTreeModel } from '@/models/get-job-skills';
 import { useSkill } from '@/store/useSkill';
 
 
 const SkillSection = ({
     jobData,
-} : {
+}: {
     jobData: JobModel[] | undefined;
 }) => {
+    const theme = useTheme();
+    const isMDScreen = useMediaQuery(theme.breakpoints.up("md"));
 
     const selectedJob = useSkill((x) => x.gameData);
+
+    const paddedSkills = (skillTree: { [key: number]: SkillTreeModel }): SkillTreeModel[] => {
+        const skills: SkillTreeModel[] = Object.values(skillTree);
+        const renderCount = skills.length <= 2 ? 2 : 4;
+        return [...skills, ...Array(renderCount - skills.length).fill({ 'jobId': -1, 'jobName': 'N/A', 'skillPoints': 0, 'skills': {}, 'usedSkillPoints': 0 })];
+    };
 
     return (
         <Box
@@ -36,69 +45,107 @@ const SkillSection = ({
                         gap: { xs: 2, md: 1 },
                     }}
                 >
-                    {Object.values(selectedJob.skillTree).map((x, idx) => (
-                        <Paper
-                            key={`skill-box-${idx}`}
-                            elevation={3}
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'stretch',
-                                width: '100%',
-                                height: '100%',
-                                padding: 2,
-                                borderRadius: 2,
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <Box
+                    {paddedSkills(selectedJob.skillTree).map((x, idx) => {
+                        return isMDScreen ? (
+                            <Paper
+                                key={`skill-box-${idx}`}
+                                elevation={3}
                                 sx={{
-                                    display: "flex",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    flex: 1,
-                                    gap: 2,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'stretch',
+                                    width: '100%',
+                                    height: '100%',
+                                    padding: 2,
+                                    borderRadius: 2,
+                                    justifyContent: 'center',
                                 }}
                             >
-                                <Typography
-                                    fontSize={22}
-                                    fontWeight={700}
-                                >
-                                    {x.jobName}
-                                </Typography>
-                                <Typography
-                                    fontSize={16}
-                                    fontWeight={700}
+                                <Box
                                     sx={{
-                                        color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flex: 1,
+                                        gap: 2,
                                     }}
                                 >
-                                    ({x.usedSkillPoints}/{x.skillPoints})
-                                </Typography>
-                            </Box>
-                            <Box
-                                sx={{
-                                    display: { xs: 'none', md: 'inline' },
-                                }}
-                            >
+                                    <Typography
+                                        fontSize={22}
+                                        fontWeight={700}
+                                        sx={{
+                                            display: x.jobId >= 0 ? 'inline' : 'none',
+                                        }}
+                                    >
+                                        {x.jobName}
+                                    </Typography>
+                                    <Typography
+                                        fontSize={16}
+                                        fontWeight={700}
+                                        sx={{
+                                            display: x.jobId >= 0 ? 'inline' : 'none',
+                                            color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                        }}
+                                    >
+                                        ({x.usedSkillPoints}/{x.skillPoints})
+                                    </Typography>
+                                </Box>
                                 <SkillTable
                                     key={`skill-table-${idx}`}
                                     jobId={x.jobId}
                                 />
-                            </Box>
-                            <Box
+                            </Paper>
+                        ) : x.jobId >= 0 ? (
+                            <Paper
+                                key={`skill-box-${idx}`}
+                                elevation={3}
                                 sx={{
-                                    display: { xs: 'inline', md: 'none' },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'stretch',
+                                    width: '100%',
+                                    height: '100%',
+                                    padding: 2,
+                                    borderRadius: 2,
+                                    justifyContent: 'center',
                                 }}
                             >
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flex: 1,
+                                        gap: 2,
+                                    }}
+                                >
+                                    <Typography
+                                        fontSize={22}
+                                        fontWeight={700}
+                                    >
+                                        {x.jobName}
+                                    </Typography>
+                                    <Typography
+                                        fontSize={16}
+                                        fontWeight={700}
+                                        sx={{
+                                            color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                        }}
+                                    >
+                                        ({x.usedSkillPoints}/{x.skillPoints})
+                                    </Typography>
+                                </Box>
                                 <MobileSkillTable
                                     key={`mobile-skill-table-${idx}`}
                                     jobId={x.jobId}
                                 />
-                            </Box>
-                        </Paper>
-                    ))}
+                            </Paper>
+                        ) : (
+                            <></>
+                        )
+                    })}
                 </Box>
             ) : (
                 <Box
