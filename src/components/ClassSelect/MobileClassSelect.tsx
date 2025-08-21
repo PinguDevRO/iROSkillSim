@@ -4,27 +4,30 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import JobTooltip from '../JobTooltip/JobTooltip';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { job_list, get_jobname_by_id } from '@/constants/joblist';
+import { class_list, get_jobname_by_id } from '@/constants/joblist';
 import { useSkill } from '@/store/useSkill';
 import { JobModel } from '@/models/get-job-skills';
 
 const MobileClassSelect = ({
     jobData,
-} : {
+}: {
     jobData: JobModel[] | undefined;
 }) => {
 
-    const selectedClass = useSkill((x) => x.gameData);
+    const selectedJob = useSkill((x) => x.gameData);
     const setSelectedJob = useSkill((x) => x.set_game_data);
 
     const handleChange = (e: SelectChangeEvent) => {
         const job_name = e.target.value;
-        if(jobData && job_name.length > 0) {
-            const selected = job_list.find((x) => x.name === job_name);
-            if(selected){
-                const foundJob = jobData.find((x) => x.jobId === selected.id);
-                if(foundJob){
-                    setSelectedJob(foundJob);
+        console.log(jobData);
+        if (jobData && job_name.length > 0) {
+            for (const classList of class_list) {
+                const selected = classList.job_list.find((x) => x.name === job_name);
+                if (selected) {
+                    const foundJob = jobData.find((x) => x.jobId === selected.id);
+                    if (foundJob) {
+                        setSelectedJob(foundJob);
+                    }
                 }
             }
         }
@@ -38,18 +41,19 @@ const MobileClassSelect = ({
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 1,
-                m: 2,
+                px: 4,
+                py: 2,
                 width: "100%",
             }}
         >
             <Typography variant="body2" fontWeight={700} component="span">
-                    Class Selection
+                Class Selection
             </Typography>
-            <FormControl fullWidth>
+            <FormControl fullWidth size="small">
                 <Select
                     id="select-job-name"
                     size="small"
-                    value={selectedClass !== null ? get_jobname_by_id(selectedClass.jobId) : ''}
+                    value={selectedJob !== null ? get_jobname_by_id(selectedJob.jobId) : ''}
                     onChange={handleChange}
                     sx={{
                         background: '#FFFFFF',
@@ -58,17 +62,78 @@ const MobileClassSelect = ({
                         },
                     }}
                 >
-                    <MenuItem disabled value="">
-                        <em>Pick your Class</em>
+                    <MenuItem disabled value={undefined}>
+                        <em>First Class</em>
                     </MenuItem>
-                    {job_list.map((x) => (
-                        <MenuItem
-                            key={x.id}
-                            value={x.name}
-                        >
+                    {class_list[0].job_list.map((y) => (
+                        <MenuItem key={y.id} value={y.name}>
                             <Box display="flex" flexDirection="row" gap={2} alignItems="center">
-                                <JobTooltip jobId={x.id} jobName={x.name} isSelected={selectedClass !== null && x.id === selectedClass.jobId} />
-                                {x.name}
+                                <JobTooltip
+                                    jobId={y.id}
+                                    jobName={y.name}
+                                    isSelected={selectedJob?.jobId === y.id}
+                                />
+                                {y.name}
+                            </Box>
+                        </MenuItem>
+                    ))}
+                    <MenuItem disabled value={undefined}>
+                        <em>Second Class</em>
+                    </MenuItem>
+                    {class_list[1].job_list.map((y) => (
+                        <MenuItem key={y.id} value={y.name}>
+                            <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                                <JobTooltip
+                                    jobId={y.id}
+                                    jobName={y.name}
+                                    isSelected={selectedJob?.jobId === y.id}
+                                />
+                                {y.name}
+                            </Box>
+                        </MenuItem>
+                    ))}
+                    <MenuItem disabled value={undefined}>
+                        <em>Third Class</em>
+                    </MenuItem>
+                    {class_list[2].job_list.map((y) => (
+                        <MenuItem key={y.id} value={y.name}>
+                            <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                                <JobTooltip
+                                    jobId={y.id}
+                                    jobName={y.name}
+                                    isSelected={selectedJob?.jobId === y.id}
+                                />
+                                {y.name}
+                            </Box>
+                        </MenuItem>
+                    ))}
+                    <MenuItem disabled value={undefined}>
+                        <em>Fourth Class</em>
+                    </MenuItem>
+                    {class_list[3].job_list.map((y) => (
+                        <MenuItem key={y.id} value={y.name}>
+                            <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                                <JobTooltip
+                                    jobId={y.id}
+                                    jobName={y.name}
+                                    isSelected={selectedJob?.jobId === y.id}
+                                />
+                                {y.name}
+                            </Box>
+                        </MenuItem>
+                    ))}
+                    <MenuItem disabled value={undefined}>
+                        <em>Special Class</em>
+                    </MenuItem>
+                    {class_list[4].job_list.map((y) => (
+                        <MenuItem key={y.id} value={y.name}>
+                            <Box display="flex" flexDirection="row" gap={2} alignItems="center">
+                                <JobTooltip
+                                    jobId={y.id}
+                                    jobName={y.name}
+                                    isSelected={selectedJob?.jobId === y.id}
+                                />
+                                {y.name}
                             </Box>
                         </MenuItem>
                     ))}

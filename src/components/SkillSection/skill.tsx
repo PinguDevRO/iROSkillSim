@@ -141,7 +141,7 @@ const Skill = ({
                             {skill.skillState.skillLevel}
                         </Typography>
                     ) : (
-                        <></>
+                        null
                     )}
                     <Overlay show={skill.skillState.state} />
                 </StyledIconButton>

@@ -199,7 +199,7 @@ const MobileSkillTable = ({
                                 </Box>
                             </>
                         ) : (
-                            <></>
+                            null
                         )}
                     </Box>
                 );

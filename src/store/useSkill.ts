@@ -309,15 +309,19 @@ const setHoverRecursive = (skillId: number, isHover: boolean, gameData: JobModel
     }
 };
 
+export type GameClass = "1" | "2" | "3" | "4" | "5";
+
 export type State = {
     _roMode: boolean;
     _showSkillDescription: boolean;
     _characterModal: boolean;
     _shareModal: boolean;
     _shareLink: string | null;
+    _selectedGameClass: GameClass;
     gameData: JobModel | null;
 
     set_game_data: (gameData: JobModel | null) => void;
+    set_selected_game_class: (_selectedGameClass: GameClass) => void;
     level_up_skill: (jobId: number, skillId: number, maxLevel?: number) => void;
     level_down_skill: (jobId: number, skillId: number, maxLevel?: number) => void;
     hover_skill_dependency: (skillId: number, isHover: boolean) => void;
@@ -339,6 +343,7 @@ export const initialState = {
     _characterModal: true,
     _shareModal: false,
     _shareLink: null,
+    _selectedGameClass: "4" as GameClass,
     gameData: null,
 };
 
@@ -351,6 +356,9 @@ export const useSkill = create<State>()(
                 const isRoMode = get()._roMode;
                 const finalGameData = validateUsedPoint(isRoMode, gameData);
                 set({ gameData: finalGameData });
+            },
+            set_selected_game_class: (_selectedGameClass: GameClass) => {
+                set({ _selectedGameClass });
             },
             level_up_skill: (jobId: number, skillId: number, maxLevel?: number) => {
                 const gameData = get().gameData;

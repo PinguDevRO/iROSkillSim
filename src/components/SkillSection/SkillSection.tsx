@@ -98,7 +98,7 @@ const SkillSection = ({
                             </Paper>
                         ) : x.jobId >= 0 ? (
                             <Paper
-                                key={`skill-box-${idx}`}
+                                key={`skill-box-mobile-${idx}`}
                                 elevation={3}
                                 sx={{
                                     display: 'flex',
@@ -143,7 +143,7 @@ const SkillSection = ({
                                 />
                             </Paper>
                         ) : (
-                            <></>
+                            null
                         )
                     })}
                 </Box>

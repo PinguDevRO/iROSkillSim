@@ -282,7 +282,7 @@ const ServerStatus = ({
             </Box>
           </>
         ) : (
-          <></>
+          null
         )}
       </Box>
       <Box flexGrow={1} display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
