@@ -59,10 +59,41 @@ const Footer = () => {
                     <Image
                         src="/discord.svg"
                         alt="Discord"
-                        width={16}
-                        height={16}
+                        width={24}
+                        height={24}
                     />
                     iRO Wiki - Ragnarok Online
+                </Link>
+                <Link
+                    href="https://oldskillsim.irowiki.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        fontSize: {
+                            xs: '0.6rem',
+                            sm: '0.8rem',
+                            md: '1rem',
+                        },
+                        color: '#3399ff',
+                        textDecoration: 'none',
+                        '&:hover': {
+                            color: '#1a73e8',
+                            textDecoration: 'underline',
+                        },
+                    }}
+                >
+                    <Image
+                        src="/poring.png"
+                        alt="iRoWiki"
+                        width={36}
+                        height={36}
+                        draggable={false}
+                        unoptimized
+                    />
+                    Old iW Skill Simulator
                 </Link>
             </Stack>
         </Box>

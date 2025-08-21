@@ -18,10 +18,11 @@ const MenuButton = () => {
             gap={2}
         >
             <Button
-                variant='outlined'
+                variant='contained'
                 onClick={() => open_modal()}
                 sx={{
                     display: { xs: 'none', md: 'inline' },
+                    backgroundColor: '#EAC4C4',
                 }}
             >
                 <Typography
@@ -37,8 +38,11 @@ const MenuButton = () => {
                 </Typography>
             </Button>
             <Button
-                variant='outlined'
+                variant='contained'
                 onClick={() => share_modal()}
+                sx={{
+                    backgroundColor: '#EAC4C4',
+                }}
             >
                 <Typography
                     variant='body2'
@@ -53,8 +57,11 @@ const MenuButton = () => {
                 </Typography>
             </Button>
             <Button
-                variant='outlined'
+                variant='contained'
                 onClick={() => reset_skills()}
+                sx={{
+                    backgroundColor: '#EAC4C4',
+                }}
             >
                 <Typography
                     variant='body2'
