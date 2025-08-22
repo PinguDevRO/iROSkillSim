@@ -254,11 +254,9 @@ const validateSkills = (isRoMode: boolean, gameData: JobModel | null, skillId?: 
     const updatedGameData = { ...gameData, skillTree: updatedSkillTree };
 
     updateUsedSkillPoints(updatedGameData);
-    if (isRoMode) {
-        if (updatedGameData.usedSkillPoints > updatedGameData.skillPoints) {
-            updateUsedSkillPoints(defaultGameData);
-            return defaultGameData;
-        }
+    if (updatedGameData.usedSkillPoints > updatedGameData.skillPoints) {
+        updateUsedSkillPoints(defaultGameData);
+        return defaultGameData;
     }
 
     return updatedGameData;

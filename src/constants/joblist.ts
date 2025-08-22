@@ -244,8 +244,8 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 8,
-                name: "High Priest",
+                id: 14,
+                name: "Paladin",
                 skill_points: [
                     job_skill_point.first_class,
                     job_skill_point.second_class,
@@ -260,46 +260,6 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 10,
-                name: "Whitesmith",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
-                id: 11,
-                name: "Sniper",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
-                id: 12,
-                name: "Assassin Cross",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
-                id: 14,
-                name: "Paladin",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
-                id: 15,
-                name: "Champion",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
                 id: 16,
                 name: "Professor",
                 skill_points: [
@@ -308,16 +268,8 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 17,
-                name: "Stalker",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                ],
-            },
-            {
-                id: 18,
-                name: "Creator",
+                id: 11,
+                name: "Sniper",
                 skill_points: [
                     job_skill_point.first_class,
                     job_skill_point.second_class,
@@ -334,6 +286,54 @@ export const class_list: ClassListModel[] = [
             {
                 id: 20,
                 name: "Gypsy",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 8,
+                name: "High Priest",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 15,
+                name: "Champion",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 10,
+                name: "Whitesmith",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 18,
+                name: "Creator",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 12,
+                name: "Assassin Cross",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                ],
+            },
+            {
+                id: 17,
+                name: "Stalker",
                 skill_points: [
                     job_skill_point.first_class,
                     job_skill_point.second_class,
@@ -371,51 +371,6 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 4055,
-                name: "Warlock",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                    job_skill_point.third_class,
-                ],
-            },
-            {
-                id: 4056,
-                name: "Ranger",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                    job_skill_point.third_class,
-                ],
-            },
-            {
-                id: 4057,
-                name: "Arch Bishop",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                    job_skill_point.third_class,
-                ],
-            },
-            {
-                id: 4058,
-                name: "Mechanic",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                    job_skill_point.third_class,
-                ],
-            },
-            {
-                id: 4059,
-                name: "Guillotine Cross",
-                skill_points: [
-                    job_skill_point.first_class,
-                    job_skill_point.second_class,
-                    job_skill_point.third_class,
-                ],
-            },
-            {
                 id: 4066,
                 name: "Royal Guard",
                 skill_points: [
@@ -425,8 +380,26 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
+                id: 4055,
+                name: "Warlock",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                    job_skill_point.third_class,
+                ],
+            },
+            {
                 id: 4067,
                 name: "Sorcerer",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                    job_skill_point.third_class,
+                ],
+            },
+            {
+                id: 4056,
+                name: "Ranger",
                 skill_points: [
                     job_skill_point.first_class,
                     job_skill_point.second_class,
@@ -452,8 +425,26 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
+                id: 4057,
+                name: "Arch Bishop",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                    job_skill_point.third_class,
+                ],
+            },
+            {
                 id: 4070,
                 name: "Sura",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                    job_skill_point.third_class,
+                ],
+            },
+            {
+                id: 4058,
+                name: "Mechanic",
                 skill_points: [
                     job_skill_point.first_class,
                     job_skill_point.second_class,
@@ -470,6 +461,15 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
+                id: 4059,
+                name: "Guillotine Cross",
+                skill_points: [
+                    job_skill_point.first_class,
+                    job_skill_point.second_class,
+                    job_skill_point.third_class,
+                ],
+            },
+            {
                 id: 4072,
                 name: "Shadow Chaser",
                 skill_points: [
@@ -479,29 +479,19 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 4239,
-                name: "Star Emperor",
-                skill_points: [
-                    job_skill_point.first_class_expanded_2,
-                    job_skill_point.second_class_expanded_2,
-                    job_skill_point.third_class_expanded_2,
-                ],
-            },
-            {
-                id: 4240,
-                name: "Soul Reaper",
-                skill_points: [
-                    job_skill_point.first_class_expanded_2,
-                    job_skill_point.second_class_expanded_2,
-                    job_skill_point.third_class_expanded_2,
-                ],
-            },
-            {
                 id: 4190,
                 name: "Super Novice Ex",
                 skill_points: [
                     job_skill_point.first_super_novice,
                     job_skill_point.second_super_novice,
+                ],
+            },
+            {
+                id: 4215,
+                name: "Rebellion",
+                skill_points: [
+                    job_skill_point.first_class_expanded_1,
+                    job_skill_point.second_class_expanded_1,
                 ],
             },
             {
@@ -521,11 +511,21 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 4215,
-                name: "Rebellion",
+                id: 4239,
+                name: "Star Emperor",
                 skill_points: [
-                    job_skill_point.first_class_expanded_1,
-                    job_skill_point.second_class_expanded_1,
+                    job_skill_point.first_class_expanded_2,
+                    job_skill_point.second_class_expanded_2,
+                    job_skill_point.third_class_expanded_2,
+                ],
+            },
+            {
+                id: 4240,
+                name: "Soul Reaper",
+                skill_points: [
+                    job_skill_point.first_class_expanded_2,
+                    job_skill_point.second_class_expanded_2,
+                    job_skill_point.third_class_expanded_2,
                 ],
             },
         ],
@@ -665,23 +665,21 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 4302,
-                name: "Sky Emperor",
+                id: 4307,
+                name: "Hyper Novice",
                 skill_points: [
-                    job_skill_point.first_class_expanded_2,
-                    job_skill_point.second_class_expanded_2,
-                    job_skill_point.third_class_expanded_2,
+                    job_skill_point.first_super_novice,
+                    job_skill_point.second_super_novice,
                     job_skill_point.fourth_class_expanded_2,
                 ],
             },
             {
-                id: 4303,
-                name: "Soul Ascetic",
+                id: 4306,
+                name: "Night Watch",
                 skill_points: [
-                    job_skill_point.first_class_expanded_2,
-                    job_skill_point.second_class_expanded_2,
-                    job_skill_point.third_class_expanded_2,
-                    job_skill_point.fourth_class_expanded_2,
+                    job_skill_point.first_class_expanded_1,
+                    job_skill_point.second_class_expanded_1,
+                    job_skill_point.third_class_expanded_1,
                 ],
             },
             {
@@ -703,20 +701,22 @@ export const class_list: ClassListModel[] = [
                 ],
             },
             {
-                id: 4306,
-                name: "Night Watch",
+                id: 4302,
+                name: "Sky Emperor",
                 skill_points: [
-                    job_skill_point.first_class_expanded_1,
-                    job_skill_point.second_class_expanded_1,
-                    job_skill_point.third_class_expanded_1,
+                    job_skill_point.first_class_expanded_2,
+                    job_skill_point.second_class_expanded_2,
+                    job_skill_point.third_class_expanded_2,
+                    job_skill_point.fourth_class_expanded_2,
                 ],
             },
             {
-                id: 4307,
-                name: "Hyper Novice",
+                id: 4303,
+                name: "Soul Ascetic",
                 skill_points: [
-                    job_skill_point.first_super_novice,
-                    job_skill_point.second_super_novice,
+                    job_skill_point.first_class_expanded_2,
+                    job_skill_point.second_class_expanded_2,
+                    job_skill_point.third_class_expanded_2,
                     job_skill_point.fourth_class_expanded_2,
                 ],
             },
@@ -759,7 +759,7 @@ export const get_jobname_by_id = (id: number): string => {
 };
 
 export const get_total_skill_point_by_id = (id: number): number => {
-    for(const classList of class_list){
+    for (const classList of class_list) {
         const foundJob = classList.job_list.find((x) => x.id === id);
         if (foundJob) {
             return foundJob.skill_points.reduce((acc, curr) => acc + curr, 0);
@@ -770,7 +770,7 @@ export const get_total_skill_point_by_id = (id: number): number => {
 
 export const get_skill_points_by_id = (id: number, index?: number): number => {
     if (index !== undefined) {
-        for(const classList of class_list){
+        for (const classList of class_list) {
             for (const job of classList.job_list) {
                 if (job.id === id && job.skill_points.length > index) {
                     return job.skill_points[index];
@@ -781,7 +781,7 @@ export const get_skill_points_by_id = (id: number, index?: number): number => {
     }
     else {
         let total_points = 0;
-        for(const classList of class_list){
+        for (const classList of class_list) {
             const job = classList.job_list.find((x) => x.id === id);
             if (job !== undefined) {
                 for (const val of job.skill_points) {
