@@ -6,7 +6,7 @@ import MobileSkillTable from './MobileSkillTable';
 import MobileClassSelect from '../ClassSelect/MobileClassSelect';
 import { useTheme, useMediaQuery } from "@mui/material";
 import { JobModel, SkillTreeModel } from '@/models/get-job-skills';
-import { useSkill } from '@/store/useSkill';
+import { useSkill, getOverusedSkillData, OverusedModel } from '@/store/useSkill';
 
 
 const SkillSection = ({
@@ -18,11 +18,23 @@ const SkillSection = ({
     const isMDScreen = useMediaQuery(theme.breakpoints.up("md"));
 
     const selectedJob = useSkill((x) => x.gameData);
+    const overusedData = getOverusedSkillData(selectedJob);
 
     const paddedSkills = (skillTree: { [key: number]: SkillTreeModel }): SkillTreeModel[] => {
         const skills: SkillTreeModel[] = Object.values(skillTree);
         const renderCount = skills.length <= 2 ? 2 : 4;
         return [...skills, ...Array(renderCount - skills.length).fill({ 'jobId': -1, 'jobName': 'N/A', 'skillPoints': 0, 'skills': {}, 'usedSkillPoints': 0 })];
+    };
+
+    const getOverusedData = (jobId: number): OverusedModel | null => {
+        if (!overusedData) return null;
+
+        const idx = overusedData.findIndex((x) => x.job_id === jobId);
+        if (idx >= 0) {
+            return overusedData[idx];
+        }
+
+        return null;
     };
 
     return (
@@ -46,6 +58,7 @@ const SkillSection = ({
                     }}
                 >
                     {paddedSkills(selectedJob.skillTree).map((x, idx) => {
+                        const overusedJobData = getOverusedData(x.jobId);
                         return isMDScreen ? (
                             <Paper
                                 key={`skill-box-${idx}`}
@@ -84,11 +97,11 @@ const SkillSection = ({
                                         fontSize={16}
                                         fontWeight={700}
                                         sx={{
-                                            display: x.jobId >= 0 ? 'inline' : 'none',
+                                            display: x.jobId >= 0 ? 'flex' : 'none',
                                             color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
                                         }}
                                     >
-                                        ({x.usedSkillPoints}/{x.skillPoints})
+                                        ({x.usedSkillPoints}/{x.skillPoints}{x.usedSkillPoints > x.skillPoints ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;+{x.usedSkillPoints - x.skillPoints}</Typography> : null}{overusedJobData && overusedJobData.overused > 0 ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;-{overusedJobData.overused}</Typography> : null})
                                     </Typography>
                                 </Box>
                                 <SkillTable

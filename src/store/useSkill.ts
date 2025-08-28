@@ -10,6 +10,45 @@ interface ShareModel {
     skills: { [key: number]: number };
 };
 
+export interface OverusedModel {
+    job_id: number;
+    job_name: string;
+    overused: number;
+};
+
+
+export const getOverusedSkillData = (gameData: JobModel | null): OverusedModel[] | null => {
+    if (!gameData) return null;
+
+    const output: OverusedModel[] = [];
+    const skillTrees = Object.values(gameData.skillTree);
+
+    let debt = 0;
+
+    for (let i = 0; i < skillTrees.length; i++) {
+        const tree = skillTrees[i];
+        const available = tree.skillPoints - tree.usedSkillPoints;
+        let lossForThisJob = 0;
+
+        if (available < 0) {
+            debt += Math.abs(available);
+        } else if (debt > 0) {
+            const usedToOffset = Math.min(available, debt);
+            lossForThisJob = usedToOffset;
+            debt -= usedToOffset;
+        }
+
+        output.push({
+            job_id: tree.jobId,
+            job_name: tree.jobName,
+            overused: lossForThisJob,
+        });
+    }
+
+    return output;
+};
+
+
 const encodeSharedURL = (model: ShareModel): string => {
     const bits: number[] = [];
 
