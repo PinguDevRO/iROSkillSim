@@ -144,10 +144,11 @@ const SkillSection = ({
                                         fontSize={16}
                                         fontWeight={700}
                                         sx={{
+                                            display: x.jobId >= 0 ? 'flex' : 'none',
                                             color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
                                         }}
                                     >
-                                        ({x.usedSkillPoints}/{x.skillPoints})
+                                        ({x.usedSkillPoints}/{x.skillPoints}{x.usedSkillPoints > x.skillPoints ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;+{x.usedSkillPoints - x.skillPoints}</Typography> : null}{overusedJobData && overusedJobData.overused > 0 ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;-{overusedJobData.overused}</Typography> : null})
                                     </Typography>
                                 </Box>
                                 <MobileSkillTable
