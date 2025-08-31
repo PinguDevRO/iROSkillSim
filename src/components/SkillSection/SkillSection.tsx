@@ -81,7 +81,7 @@ const SkillSection = ({
                                         alignItems: "center",
                                         justifyContent: "center",
                                         flex: 1,
-                                        gap: 2,
+                                        gap: 1,
                                     }}
                                 >
                                     <Typography
@@ -93,16 +93,60 @@ const SkillSection = ({
                                     >
                                         {x.jobName}
                                     </Typography>
-                                    <Typography
-                                        fontSize={16}
-                                        fontWeight={700}
+                                    <Box
                                         sx={{
-                                            display: x.jobId >= 0 ? 'flex' : 'none',
-                                            color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            display: "flex",
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            justifyContent: "center",
                                         }}
                                     >
-                                        ({x.usedSkillPoints}/{x.skillPoints}{x.usedSkillPoints > x.skillPoints ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;+{x.usedSkillPoints - x.skillPoints}</Typography> : null}{overusedJobData && overusedJobData.overused > 0 ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;-{overusedJobData.overused}</Typography> : null})
-                                    </Typography>
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            (
+                                        </Typography>
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            {x.usedSkillPoints}/{x.skillPoints}
+                                        </Typography>
+                                        {x.usedSkillPoints > x.skillPoints ? (
+                                            <Typography
+                                                fontSize={16}
+                                                fontWeight={700}
+                                                sx={{ color: 'red' }}
+                                            >
+                                                &nbsp;+{x.usedSkillPoints - x.skillPoints}
+                                            </Typography>
+                                        ) : null}
+                                        {overusedJobData && overusedJobData.overused > 0 ? (
+                                            <Typography
+                                                fontSize={16}
+                                                fontWeight={700}
+                                                sx={{ color: 'red' }}
+                                            >
+                                                &nbsp;-{overusedJobData.overused}
+                                            </Typography>
+                                        ) : null}
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            )
+                                        </Typography>
+                                    </Box>
                                 </Box>
                                 <SkillTable
                                     key={`skill-table-${idx}`}
@@ -131,25 +175,72 @@ const SkillSection = ({
                                         alignItems: "center",
                                         justifyContent: "center",
                                         flex: 1,
-                                        gap: 2,
+                                        gap: 1,
                                     }}
                                 >
                                     <Typography
                                         fontSize={22}
                                         fontWeight={700}
+                                        sx={{
+                                            display: x.jobId >= 0 ? 'inline' : 'none',
+                                        }}
                                     >
                                         {x.jobName}
                                     </Typography>
-                                    <Typography
-                                        fontSize={16}
-                                        fontWeight={700}
+                                    <Box
                                         sx={{
-                                            display: x.jobId >= 0 ? 'flex' : 'none',
-                                            color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            display: "flex",
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            justifyContent: "center",
                                         }}
                                     >
-                                        ({x.usedSkillPoints}/{x.skillPoints}{x.usedSkillPoints > x.skillPoints ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;+{x.usedSkillPoints - x.skillPoints}</Typography> : null}{overusedJobData && overusedJobData.overused > 0 ? <Typography fontSize={16} fontWeight={700} sx={{ color: 'red' }}>&nbsp;-{overusedJobData.overused}</Typography> : null})
-                                    </Typography>
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            (
+                                        </Typography>
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            {x.usedSkillPoints}/{x.skillPoints}
+                                        </Typography>
+                                        {x.usedSkillPoints > x.skillPoints ? (
+                                            <Typography
+                                                fontSize={16}
+                                                fontWeight={700}
+                                                sx={{ color: 'red' }}
+                                            >
+                                                &nbsp;+{x.usedSkillPoints - x.skillPoints}
+                                            </Typography>
+                                        ) : null}
+                                        {overusedJobData && overusedJobData.overused > 0 ? (
+                                            <Typography
+                                                fontSize={16}
+                                                fontWeight={700}
+                                                sx={{ color: 'red' }}
+                                            >
+                                                &nbsp;-{overusedJobData.overused}
+                                            </Typography>
+                                        ) : null}
+                                        <Typography
+                                            fontSize={16}
+                                            fontWeight={700}
+                                            sx={{
+                                                color: x.usedSkillPoints > x.skillPoints ? 'red' : 'inherit',
+                                            }}
+                                        >
+                                            )
+                                        </Typography>
+                                    </Box>
                                 </Box>
                                 <MobileSkillTable
                                     key={`mobile-skill-table-${idx}`}

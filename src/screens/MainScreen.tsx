@@ -11,6 +11,7 @@ import Paper from "@mui/material/Paper";
 import Loading from '@/components/Loading/Loading';
 import ClassSelect from '@/components/ClassSelect/ClassSelect';
 import ShareModal from '@/components/ShareModal/ShareModal';
+import InstructionModal from '@/components/InstructionModal/InstructionModal';
 import SkillHeader from '@/components/SkillSection/SkillHeader';
 import SkillSection from '@/components/SkillSection/SkillSection';
 import { COLORS } from "@/theme/colors";
@@ -44,6 +45,7 @@ const MainScreen = ({
         >
             <ClassSelect jobData={model?.jobSkillsData} />
             <ShareModal />
+            <InstructionModal />
             <Box
                 sx={{
                     display: 'grid',

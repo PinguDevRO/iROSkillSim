@@ -352,6 +352,7 @@ export type State = {
     _roMode: boolean;
     _showSkillDescription: boolean;
     _characterModal: boolean;
+    _instructionModal: boolean;
     _shareModal: boolean;
     _shareLink: string | null;
     _selectedGameClass: GameClass;
@@ -367,6 +368,8 @@ export type State = {
     update_ro_mode: (_roMode: boolean) => void;
     open_character_modal: () => void;
     close_character_modal: () => void;
+    open_instruction_modal: () => void;
+    close_instruction_modal: () => void;
     open_share_modal: () => void;
     close_share_modal: () => void;
     load_skill_build: (build: string, jobData: JobModel[] | undefined) => void;
@@ -378,6 +381,7 @@ export const initialState = {
     _roMode: false,
     _showSkillDescription: false,
     _characterModal: true,
+    _instructionModal: false,
     _shareModal: false,
     _shareLink: null,
     _selectedGameClass: "4" as GameClass,
@@ -473,6 +477,12 @@ export const useSkill = create<State>()(
             },
             close_character_modal: () => {
                 set({ _characterModal: false });
+            },
+            open_instruction_modal: () => {
+                set({ _instructionModal: true });
+            },
+            close_instruction_modal: () => {
+                set({ _instructionModal: false });
             },
             open_share_modal: () => {
                 get().share_skill_build();

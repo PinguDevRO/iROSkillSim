@@ -6,8 +6,9 @@ import { useSkill } from '@/store/useSkill';
 const MenuButton = () => {
 
     const open_modal = useSkill((x) => x.open_character_modal);
-    const share_modal = useSkill((x) => x.open_share_modal);
     const reset_skills = useSkill((x) => x.reset_skills);
+    const share_modal = useSkill((x) => x.open_share_modal);
+    const instruction_modal = useSkill((x) => x.open_instruction_modal);
 
     return (
         <Box
@@ -39,6 +40,25 @@ const MenuButton = () => {
             </Button>
             <Button
                 variant='contained'
+                onClick={() => reset_skills()}
+                sx={{
+                    backgroundColor: '#EAC4C4',
+                }}
+            >
+                <Typography
+                    variant='body2'
+                    sx={{
+                        color: '#433e5a',
+                        fontSize: 11,
+                        fontWeight: 'bold',
+                        fontFamily: 'Tahoma',
+                    }}
+                >
+                    Reset Skills
+                </Typography>
+            </Button>
+            <Button
+                variant='contained'
                 onClick={() => share_modal()}
                 sx={{
                     backgroundColor: '#EAC4C4',
@@ -58,7 +78,7 @@ const MenuButton = () => {
             </Button>
             <Button
                 variant='contained'
-                onClick={() => reset_skills()}
+                onClick={() => instruction_modal()}
                 sx={{
                     backgroundColor: '#EAC4C4',
                 }}
@@ -72,7 +92,7 @@ const MenuButton = () => {
                         fontFamily: 'Tahoma',
                     }}
                 >
-                    Reset Skills
+                    How To
                 </Typography>
             </Button>
         </Box>

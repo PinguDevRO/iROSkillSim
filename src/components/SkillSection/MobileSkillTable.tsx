@@ -33,7 +33,7 @@ const MobileSkillTable = ({
     const startPressTimer = (e: TouchEvent) => {
         e.preventDefault();
         didLongPressRef.current = false;
-        timerRef.current = setTimeout(handleLongPress, 800);
+        timerRef.current = setTimeout(handleLongPress, 400);
     };
 
     const handleContextMenu = (e: MouseEvent) => {
