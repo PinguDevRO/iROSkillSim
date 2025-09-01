@@ -1,31 +1,13 @@
 import { GetServerStatusResponse } from "@/services/server-status";
 import { formatDate, convertUTCtoPDT } from "@/utils/date_utils";
 
-export interface StatusModel {
+
+export interface PlayerCountModel {
+    id: number;
     name: string;
-    ip: string;
-    port: number;
-    status: boolean;
-};
-
-export interface ServerCountModel {
-    ip: string;
-    port: number;
     count: number;
+    createdAt: string;
     updatedAt: string;
-};
-
-export interface ServerListStatusModel {
-    chaos: StatusModel | StatusModel[];
-    freya: StatusModel | StatusModel[];
-    thor: StatusModel | StatusModel[];
-}
-
-export interface ServerListCountModel {
-    total: number;
-    chaos: ServerCountModel;
-    freya: ServerCountModel;
-    thor: ServerCountModel;
 };
 
 export interface ScheduledMaintenanceModel {
@@ -41,11 +23,8 @@ export interface GlobalStatusModel {
 
 export interface ServerStatusModel {
     globalStatus: GlobalStatusModel[];
-    map: ServerListStatusModel;
-    char: ServerListStatusModel;
-    login: StatusModel;
-    services: StatusModel[];
-    playerCounts: ServerListCountModel;
+    playerCounts: PlayerCountModel[];
+    totalPlayerCount: number;
     scheduledMaintenance: ScheduledMaintenanceModel;
     lastUpdate: string;
     lastUpdateServerTime: string;
@@ -55,48 +34,34 @@ const ServerStatusToModel = (data: GetServerStatusResponse): ServerStatusModel =
     const globalStatus: GlobalStatusModel[] = [
         {
             name: "Login",
-            online: data.login.status === 'online' ? 1 : 0,
-            offline: data.login.status === 'offline' ? 1 : 0,
+            online: data.login.reduce((count, x) => count + (x.status ? 1 : 0), 0),
+            offline: data.login.reduce((count, x) => count + (x.status ? 0 : 1), 0),
         },
         {
             name: "Char",
-            online: data.char.chaos[0].status === 'online' ? 1 : 0,
-            offline: data.char.chaos[0].status === 'offline' ? 1 : 0,
+            online: data.char.reduce((count, x) => count + (x.status ? 1 : 0), 0),
+            offline: data.char.reduce((count, x) => count + (x.status ? 0 : 1), 0),
         },
         {
             name: "Zone",
-            online: data.map.chaos.reduce((count, x) => count + (x.status === 'online' ? 1 : 0), 0),
-            offline: data.map.chaos.reduce((count, x) => count + (x.status === 'offline' ? 1 : 0), 0),
+            online: data.map.reduce((count, x) => count + (x.status ? 1 : 0), 0),
+            offline: data.map.reduce((count, x) => count + (x.status ? 0 : 1), 0),
         },
     ];
 
-    const map: ServerListStatusModel = {
-        chaos: data.map.chaos.map((x) => { return { 'name': x.name, 'ip': x.ip, 'port': x.port, 'status': x.status === 'offline' ? false : true } }),
-        thor: data.map.thor.map((x) => { return { 'name': x.name, 'ip': x.ip, 'port': x.port, 'status': x.status === 'offline' ? false : true } }),
-        freya: data.map.freya.map((x) => { return { 'name': x.name, 'ip': x.ip, 'port': x.port, 'status': x.status === 'offline' ? false : true } })
-    };
+    const playerCounts: PlayerCountModel[] = [];
+    let totalPlayerCount = 0;
 
-    const char: ServerListStatusModel = {
-        chaos: (({ name, ip, port, status }) => ({ name, ip, port, status: status !== 'offline' }))(data.char.chaos[0]),
-        thor: (({ name, ip, port, status }) => ({ name, ip, port, status: status !== 'offline' }))(data.char.thor[0]),
-        freya: (({ name, ip, port, status }) => ({ name, ip, port, status: status !== 'offline' }))(data.char.freya[0]),
-    };
-
-    const login: StatusModel = {
-        name: data.login.name,
-        ip: data.login.ip,
-        port: data.login.port,
-        status: data.login.status !== 'offline',
-    };
-
-    const services: StatusModel[] = data.services.HTTP.map((x) => { return { 'name': x.name, 'ip': x.ip, 'port': x.port, 'status': x.status !== 'offline' } });
-
-    const playerCounts: ServerListCountModel = {
-        total: data.player_count.chaos.count + data.player_count.freya.count + data.player_count.thor.count,
-        chaos: (({ ip, port, count, updated_at }) => ({ ip, port, count, updatedAt: updated_at }))(data.player_count.chaos),
-        thor: (({ ip, port, count, updated_at }) => ({ ip, port, count, updatedAt: updated_at }))(data.player_count.thor),
-        freya: (({ ip, port, count, updated_at }) => ({ ip, port, count, updatedAt: updated_at }))(data.player_count.freya),
-    };
+    for(const serv of data.player_count){
+        totalPlayerCount += serv.count;
+        playerCounts.push({
+            id: serv.id,
+            name: serv.name,
+            count: serv.count,
+            createdAt: serv.created_at,
+            updatedAt: serv.updated_at,
+        });
+    }
 
     const scheduledMaintenance: ScheduledMaintenanceModel = {
         start: data.latest_scheduled_maintenance.start,
@@ -105,11 +70,8 @@ const ServerStatusToModel = (data: GetServerStatusResponse): ServerStatusModel =
 
     const output: ServerStatusModel = {
         globalStatus: globalStatus,
-        map: map,
-        char: char,
-        login: login,
-        services: services,
         playerCounts: playerCounts,
+        totalPlayerCount: totalPlayerCount,
         scheduledMaintenance: scheduledMaintenance,
         lastUpdate: formatDate(data.last_update),
         lastUpdateServerTime: convertUTCtoPDT(data.last_update),

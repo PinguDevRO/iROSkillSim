@@ -153,99 +153,41 @@ const ServerStatus = ({
                   fontWeight: 700,
                 }}
               >
-                {model.serverStatusData.playerCounts.total}
+                {model.serverStatusData.totalPlayerCount}
               </CustomTypography>
             </Box>
-            <Box key={'chaos-players-value'} flexGrow={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5}>
-              <CustomTypography
-                color={COLORS.internal_link_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                Chaos
-              </CustomTypography>
-              <CustomTypography
-                color={COLORS.third_background_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                {model.serverStatusData.playerCounts.chaos.count}
-              </CustomTypography>
-            </Box>
-            <Box key={'thor-players-value'} flexGrow={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5}>
-              <CustomTypography
-                color={COLORS.internal_link_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                Thor
-              </CustomTypography>
-              <CustomTypography
-                color={COLORS.third_background_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                {model.serverStatusData.playerCounts.thor.count}
-              </CustomTypography>
-            </Box>
-            <Box key={'freya-players-value'} flexGrow={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5}>
-              <CustomTypography
-                color={COLORS.internal_link_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                Freya
-              </CustomTypography>
-              <CustomTypography
-                color={COLORS.third_background_text}
-                variant="body2"
-                component="div"
-                sx={{
-                  flexGrow: 1,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  fontWeight: 700,
-                }}
-              >
-                {model.serverStatusData.playerCounts.freya.count}
-              </CustomTypography>
-            </Box>
+            {model.serverStatusData.playerCounts.map((x, idx) => (
+              <Box key={`${x.name}-players-value-${idx}`} flexGrow={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={0.5}>
+                <CustomTypography
+                  color={COLORS.internal_link_text}
+                  variant="body2"
+                  component="div"
+                  sx={{
+                    flexGrow: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontWeight: 700,
+                  }}
+                >
+                  {x.name}
+                </CustomTypography>
+                <CustomTypography
+                  color={COLORS.third_background_text}
+                  variant="body2"
+                  component="div"
+                  sx={{
+                    flexGrow: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontWeight: 700,
+                  }}
+                >
+                  {x.count}
+                </CustomTypography>
+              </Box>
+            ))}
           </>
         ) : model !== undefined && model.serverStatusData !== undefined && isMaintenance(model.serverStatusData.globalStatus, model.serverStatusData.scheduledMaintenance) ? (
           <>
